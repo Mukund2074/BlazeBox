@@ -10,8 +10,6 @@ export default function Catagories({ toggleCategories }) {
     const Catagories = [
         { id: 1, name: 'Home', to: '/home' , icon: <Home />},
         { id: 2, name: 'Trending', to: '/trending' , icon : <TrendingUpOutlined /> },
-        { id: 3, name: 'Playlists', to: '/playlists' , icon : <VideoLibrarySharp /> },
-        { id: 4, name: 'Shorts', to: '/shorts', icon : <VideoCameraBack /> },
     ]
     return (
         <span className='w-full items-start bg-gradient-to-b border-b-[3px] border-[#ffb03a] shadow-custom-dark  from-[#1b1a1a]  via-[#1c0c12] to-[#130619]  gap-8 flex flex-row  py-4 px-4 overflow-x-scroll scrollbar-hidden '>

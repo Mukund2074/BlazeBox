@@ -8,7 +8,7 @@ let apikey5 = process.env.NEXT_PUBLIC_APIKEY5;
 let apikey6 = process.env.NEXT_PUBLIC_APIKEY6;
 let host = process.env.NEXT_PUBLIC_APIHOST;
 
-const apiKeys = [apikey1, apikey2, apikey3, apikey4, apikey5, apikey6];
+const apiKeys = [apikey2, apikey2, apikey3, apikey4, apikey5, apikey1];
 let currentApiKeyIndex = 0;
 
 const api = axios.create({
@@ -27,7 +27,7 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   response => response,
   error => {
-    if (error.response && error.response.status === 429) {
+    if (error.response && error.response.status === 429 || error.response.data.code === 429) {
       currentApiKeyIndex = (currentApiKeyIndex + 1) % apiKeys.length;
       error.config.headers['X-RapidAPI-Key'] = apiKeys[currentApiKeyIndex];
       return axios(error.config);

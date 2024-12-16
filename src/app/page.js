@@ -32,9 +32,9 @@ export default function PageManager({ children }) {
   }
 
 
-  // useEffect(() => {
-  //   window.scrollTo(0, 0);
-  // }, [children]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [children]);
 
   return (
     <React.Fragment>

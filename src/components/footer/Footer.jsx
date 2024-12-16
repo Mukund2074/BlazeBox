@@ -12,9 +12,7 @@ export default function Footer() {
           <Link href="/trending" className="px-4">
             Trending Videos
           </Link>
-          <Link href="/contact" className="px-4">
-            Contact
-          </Link>
+          
         </div>
         <p className="text-sm">
           &copy; {new Date().getFullYear()} My Website. All Rights Reserved.
