@@ -7,7 +7,6 @@ export default function Home() {
 
   const { mainVideos , extraVideos , shorts , loadingInitial , loadingMore , error  , setPath , setContinuationPath, setEndRef } = useDataContext();
   const endRef = useRef(null);
-  // setEndRef(endRef);
   
 useEffect(() => {
   setEndRef(endRef);
