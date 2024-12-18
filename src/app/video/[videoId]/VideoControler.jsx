@@ -15,7 +15,6 @@ export default function VideoControler({
     audioOptions,
     initialType,
     setIsVideoLoading,
-    selectedVideoStream,
     videoReady,
     setVideoReady,
     audioReady,
@@ -63,7 +62,7 @@ export default function VideoControler({
         };
 
         const handleVideoClick = () => {
-            if (settingsMenu) {
+            if (settingsMenu || qualityMenu || languageMenu || playbackMenu) {
                 setSettingsMenu(false);
                 setQualityMenu(false);
                 setLanguageMenu(false);
@@ -115,21 +114,15 @@ export default function VideoControler({
         const currentVideoTime = videoRef.current.currentTime;
 
         setCurrentTime(currentVideoTime);
+        console.log("itag", itag);
+        
         setSelectedVideoQuality(itag);
 
         videoRef.current.pause();
         audioRef.current.pause();
 
-        if (selectedVideoStream) {
-            videoRef.current.src = selectedVideoStream.url;
-            videoRef.current.load();
-        }
-
-        if (selectedLanguage) {
-            audioRef.current.src = selectedLanguage.url ? selectedLanguage.url : audioOptions[0].url;
-            audioRef.current.load();
-        }
-
+        videoRef.current.src = videoOptions.find((format) => format.itag === itag).url;
+        videoRef.current.load();
 
         videoRef.current.currentTime = currentVideoTime;
         audioRef.current.currentTime = currentVideoTime;

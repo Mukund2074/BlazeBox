@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams} from 'next/navigation';
+import { useParams } from 'next/navigation';
 import api from '@/context/Api';
 import '@/app/globals.css';
 import { commentContinuationFetcher, commentFetcher, continuationFetcher, infiniteScroller, mainFetcher } from '@/context/FetchingFunctions';
@@ -13,19 +13,19 @@ import { MainVideoLoader } from '@/context/Loader';
 
 
 const VideoPage = () => {
-  const { videoId } = useParams(); 
+  const { videoId } = useParams();
   const [playlistId, setPlaylistId] = useState(null);
-  
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
-        const urlParams = new URLSearchParams(window.location.search);
-        const playlistId = urlParams.get('playlistId');
-        setPlaylistId(playlistId ? playlistId : null);
+      const urlParams = new URLSearchParams(window.location.search);
+      const playlistId = urlParams.get('playlistId');
+      setPlaylistId(playlistId ? playlistId : null);
     }
-}, [videoId]); 
+  }, [videoId]);
 
 
-  
+
   const [videoData, setVideoData] = useState(null);
   const [initialType, setInitialType] = useState();
   const [currentTime, setCurrentTime] = useState(0);
@@ -56,7 +56,7 @@ const VideoPage = () => {
   // Refs for video and audio elements
   const videoRef = useRef(null);
   const audioRef = useRef(null);
-  
+
 
   const [videoReady, setVideoReady] = useState(false);
   const [audioReady, setAudioReady] = useState(false);
@@ -123,7 +123,7 @@ const VideoPage = () => {
 
 
 
- 
+
     fetchVideoData();
   }, [videoId]);
 
@@ -147,12 +147,11 @@ const VideoPage = () => {
     format?.mimeType?.includes('audio/mp4')
   );
 
-  const selectedVideoStream = videoOptions?.find((format) => format.itag === selectedVideoQuality);
   const selectedAudioStream = audioOptions?.find((format) => format.audioOptions?.id === selectedLanguage);
 
-  const videoUrl = selectedVideoStream?.url;
-  const audioUrl = selectedAudioStream?.url;
 
+  const videoUrl = videoOptions?.find((format) => format.itag === selectedVideoQuality)?.url;
+  const audioUrl = selectedAudioStream?.url;
 
 
   if (loading) return <MainVideoLoader />
@@ -181,7 +180,7 @@ const VideoPage = () => {
           >
             <source
               src={videoUrl ? videoUrl : initialType[0]?.url}
-              type={selectedVideoStream?.mimeType ? selectedVideoStream.mimeType : initialType[0]?.mimeType} />
+              type={'video/mp4'} />
             Your browser does not support the video element.
           </video>
 
@@ -196,7 +195,6 @@ const VideoPage = () => {
             audioOptions={audioOptions}
             initialType={initialType}
             setIsVideoLoading={setIsVideoLoading}
-            selectedVideoStream={selectedVideoStream}
             videoReady={videoReady}
             setVideoReady={setVideoReady}
             audioReady={audioReady}
@@ -209,7 +207,7 @@ const VideoPage = () => {
             setFullscreen={setFullscreen}
           />
 
-          
+
           <audio
             ref={audioRef}
             controls={false}
@@ -220,7 +218,7 @@ const VideoPage = () => {
               src={audioUrl ? audioUrl : initialType[0]?.url}
               type={selectedAudioStream?.mimeType ? selectedAudioStream.mimeType : initialType[0]?.mimeType} />
             Your browser does not support the audio element.
-            
+
 
           </audio>
 
@@ -231,7 +229,7 @@ const VideoPage = () => {
             </div>
           )}
 
-        
+
 
         </div>
         <VideoDetails
@@ -240,17 +238,17 @@ const VideoPage = () => {
           bestMatchLocator={bestMatchLocator}
         />
 
-       <section className='p-4'> 
-       <VideoComments
-        videoId={videoId}
-        />
-       </section>
+        <section className='p-4'>
+          <VideoComments
+            videoId={videoId}
+          />
+        </section>
 
       </aside>
 
       <section className='w-full lg:w-[20%] p-4'>
         <VideoDisplay
-        videoId={videoId}
+          videoId={videoId}
           mainVideos={mainVideos}
           extraVideos={extraVideos}
           shorts={shorts}
