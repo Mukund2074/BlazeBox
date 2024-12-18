@@ -9,11 +9,10 @@ import CommentsPopUp from './popups/CommentsPopUp';
 import { formatViewCount } from '@/context/MultiContentRender';
 import { useShortsPlayer } from '@/context/shorts/ShortsPlayerProvider';
 
-export default function ShortsDetail({ shortsId }) {
+export default function ShortsDetail({ triggerId }) {
 
-  const {
-    setPoster,
-    videoRef,
+  const {   
+    setPlayerState,
   } = useShortsPlayer();
 
   const [ShortsDetails, setShortsDetails] = useState();
@@ -35,10 +34,10 @@ export default function ShortsDetail({ shortsId }) {
   useEffect(() => {
     const fetchShortsDetails = async () => {
       try {
-        if (shortsId !== undefined && shortsId !== null && !hasFetched.current) {
+        if (triggerId !== undefined && triggerId !== null && !hasFetched.current) {
           hasFetched.current = true;
           await ShortsFetcher({
-            shortsId,
+            shortsId : triggerId,
             setShortsDetails,
             setError,
           });
@@ -48,16 +47,20 @@ export default function ShortsDetail({ shortsId }) {
       }
     };
 
-    if (shortsId !== null && !hasFetched.current) {
+    if (triggerId !== null && !hasFetched.current) {
       fetchShortsDetails();
     }
-  }, [shortsId]);
+  }, [triggerId]);
 
 
 
   useEffect(() => {
     if (ShortsDetails) {
-      setPoster(ShortsDetails?.thumbnail ? ShortsDetails?.thumbnail[0]?.url : '/not-found-shorts.png');
+    //   setPoster(ShortsDetails?.thumbnail ? ShortsDetails?.thumbnail[0]?.url : '/not-found-shorts.png');
+    setPlayerState((prevState) => ({
+      ...prevState,
+      poster: { ...prevState.poster, [triggerId]: ShortsDetails?.thumbnail ? ShortsDetails?.thumbnail[0]?.url : '/not-found-shorts.png' },
+    }))
     }
   }, [ShortsDetails])
 
@@ -68,7 +71,7 @@ export default function ShortsDetail({ shortsId }) {
   return (
     <React.Fragment>
 
-      <section id='detail-controlers' className='absolute  text-white flex flex-col gap-2 bottom-4 md:bottom-16 right-0 md:right-2 w-[15%] h-[300px] '>
+      <section id='detail-controlers' className='absolute  text-white  flex flex-col gap-2 bottom-4 md:bottom-16 right-0 md:right-2 w-[15%] h-[300px] '>
 
         <button className='flex flex-col rounded-full  items-center justify-center cursor-pointer '>
           <span className=' rounded-full p-3 bg-[#2a282882] flex items-center justify-center '>
@@ -115,7 +118,7 @@ export default function ShortsDetail({ shortsId }) {
 
           {ShortsDetails?.channelTitle && ShortsDetails?.channelId &&
             <Link href={`/channel/${ShortsDetails?.channelId}`}>
-              <font className="text-sm cursor-pointer font-bold">{ShortsDetails?.channelTitle}</font>
+              <font className="text-sm cursor-pointer font-bold ">{ShortsDetails?.channelTitle}</font>
             </Link>}
 
 
@@ -139,19 +142,18 @@ export default function ShortsDetail({ shortsId }) {
 
 
       <CommentsPopUp
-        videoRef={videoRef}
+        triggerId={triggerId}
         showComments={showComments}
         handleShowComments={handleShowComments}
         ShortsDetails={ShortsDetails}
-        shortsId={shortsId}
         setError={setError} />
 
 
       <DescriptionPopUp
-        videoRef={videoRef}
+        triggerId={triggerId}
         showDescription={showDescription}
         handleShowDescription={handleShowDescription}
-        ShortsDetails={ShortsDetails} />
+        ShortsDetails={ShortsDetails} /> 
 
 
     </React.Fragment>

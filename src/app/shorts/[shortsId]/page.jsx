@@ -1,143 +1,121 @@
 'use client';
-import React, { useState, useEffect, useRef } from 'react';
+import { ShortsLoader } from '@/context/Loader';
+import { useShortsPlayer } from '@/context/shorts/ShortsPlayerProvider';
 import { useParams } from 'next/navigation';
-import api from '@/context/Api';
-import '@/app/globals.css';
-import { bestMatchLocator } from '@/context/MultiContentRender';
+import React, { useEffect } from 'react'
 import ShortsController from './ShortsController';
 import ShortsDetail from './details/ShortsDetail';
-import { useShortsPlayer } from '@/context/shorts/ShortsPlayerProvider';
-import { useShortsControls } from '@/context/shorts/ShortsControlsProvider';
-import { SentimentDissatisfied } from '@mui/icons-material';
-import { ShortsLoader } from '@/context/Loader';
 
+export default function Shorts() {
 
-const ShortsPage = () => {
-  const { shortsId } = useParams();
+    const { shortsId } = useParams();
+    const {
+        setShortsIdForNav,
+        playerState,
+        controlState, setControlState,
+        videoRef,
+        audioRef,
+        containerRef,
+        IndexRef,
+        getVideoRef,
+        getAudioRef,
+        getContainerRef,
+    } = useShortsPlayer();
 
-  const {
-    videoOptions,
-    audioOptions,
+    useEffect(() => {
+        if (shortsId) {
+            setShortsIdForNav(shortsId);
+        }
+    }, [shortsId, setShortsIdForNav]);
 
-    videoUrl,
-    audioUrl,
-
-    videoRef,
-    audioRef,
-    containerRef,
-
-    setFirstId,
-    shortsData,
-    poster,
-
-    loading, isVideoLoading,
-    error, setError,
-    sequence, setSequence,
-
-    setPlayerRefresher,
-  } = useShortsPlayer();
-
-  const {
-    fullscreen,
-    setMaxTime,
-    setCurrentTime,
-
-    videoReady, setVideoReady,
-    audioReady, setAudioReady,
-    isEnd, setIsEnd,
-
-    setControlRefresher
-  } = useShortsControls();
-
-  const [shortIds, setShortIds] = useState([shortsId]);
-
-
-  useEffect(() => {
-    if (shortsId) {
-      setFirstId(shortsId);
+    if (!playerState.allSet) {
+        return (
+            <ShortsLoader count={1} singleMain={true} />
+        )
     }
-  }, []);
+
+    if (playerState.allSet) {
 
 
-  useEffect(() => {
-    setControlRefresher(true)
-    setPlayerRefresher(true)
-  }, [setControlRefresher, setPlayerRefresher])
+        const handleTimeUpdate = (id) => {
+            setControlState((prevControlState) => ({
+                ...prevControlState,
+                currentTime: { ...prevControlState.currentTime, [id]: videoRef.current[id].currentTime },
+            }))
+        };
 
-  useEffect(() => {
-    if (shortsId !== undefined && shortsId !== null && sequence) {
-      setShortIds((prevShortIds) => {
-        const newShortIds = [...prevShortIds, ...sequence];
-        return [...new Set(newShortIds)];
-      });
+        return (
+            <main id='main-section' ref={containerRef} className={` ${controlState.fullscreen ? 'py-0' : 'py-4'} w-full flex flex-col items-center justify-center gap-2`}>
+                <section className={`flex flex-col items-center max-h-[100dvh] snap-y snap-mandatory overflow-y-scroll gap-10 pb-28 scrollbar-hidden ${controlState.fullscreen ? 'min-h-[100dvh]' : 'min-h-[90dvh] py-4'}`}>
+                    {
+                        playerState && playerState.listOfIds.slice(0, 5).map((item, index) => {
+
+                            return (
+                                <section
+                                    key={index}
+                                    id={item}
+                                    ref={(el) => IndexRef.current[item] = el}
+                                    className={`relative mx-auto max-w-[500px] w-full snap-start snap-always overflow-hidden rounded-xl ${controlState.fullscreen ? 'min-h-[99dvh] max-h-[99dvh]' : 'min-h-[85dvh] max-h-[85dvh]'} `}
+                                >
+
+                                    <video
+                                        ref={(el) => videoRef.current[item] = el}
+                                        className={`w-[100%]  ${controlState.fullscreen ? 'h-full' : 'h-[90dvh]'}  rounded-xl`}
+                                        id={`${item}`}
+                                        onCanPlay={() => {
+                                            setControlState((prevControlState) => ({
+                                                ...prevControlState,
+                                                videoReady: { ...prevControlState.videoReady, [item]: true },
+                                            }))
+                                        }}
+                                        onLoadedMetadata={() => {
+                                            setControlState((prevControlState) => ({
+                                                ...prevControlState,
+                                                maxTime: { ...prevControlState.maxTime, [item]: videoRef.current[item].duration },
+                                                setup : true
+                                            }))
+                                        }}
+                                        onTimeUpdate={() => handleTimeUpdate(item)}
+                                    >
+                                        <source src={`${playerState.videoUrl[item]}`} type="video/mp4" />
+                                        Your browser does not support the video tag.
+
+                                    </video>
+
+                                    <audio
+                                        ref={(el) => audioRef.current[item] = el}
+                                        id={`${item}`}
+                                        className={`w-full h-full  rounded-xl`}
+                                        onCanPlay={() => {
+                                            setControlState((prevControlState) => ({
+                                                ...prevControlState,
+                                                audioReady: { ...prevControlState.audioReady, [item]: true },
+                                            }))
+                                        }}
+                                    >
+                                        <source src={playerState.audioUrl[item]} type="audio/mpeg" />
+                                        Your browser does not support the audio tag.
+                                    </audio>
+
+                                    {playerState.isVideoLoading[item] && (
+                                        <div className="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center">
+                                            <div className="w-16 h-16 border-4 border-t-4 border-t-[#FF8A00] border-transparent rounded-full animate-spin "></div>
+                                            loading..
+                                        </div>
+                                    )}
+
+                                    <ShortsController triggerId={item} />
+
+                                    <ShortsDetail triggerId={item} />
+
+
+                                </section>
+                            );
+                        })}
+
+                        <p className='text-gray-400 responsive-text'> Only 5 Continue Shorts are available in this version </p>
+                </section>
+            </main>
+        )
     }
-  }, [sequence]);
-
-  useEffect(() => {
-  }, [shortIds])
-
-  const handleLoadedMetadata = () => {
-    setMaxTime(videoRef.current.duration);
-  };
-
-  const handleTimeUpdate = () => {
-    setCurrentTime(videoRef.current.currentTime);
-  };
-
-  if (videoOptions === undefined || videoOptions.length === 0) return <ShortsLoader count={1} singleMain={true} />
-  if (loading) return <ShortsLoader count={1} singleMain={true} />
-  if (error) console.log(error)
-
-    
-
-  return (
-    <main className='py-4 w-full flex flex-col items-center justify-center gap-2 '>
-      <section id='main-section' ref={containerRef} className='flex flex-col items-center max-h-screen snap-y snap-mandatory overflow-y-scroll scrollbar-hidden'>
-        <section id='video-container' className={`relative mx-auto max-w-[500px] w-full snap-always overflow-hidden rounded-xl ${fullscreen ? 'h-[100dvh] ' : 'h-[90dvh] '}' `}>
-          <video
-            ref={videoRef}
-            className={`w-full h-full`}
-            poster={poster ? poster : bestMatchLocator(shortsData?.thumbnail, 'url')}
-            controls={false}
-            onCanPlay={() => setVideoReady(true)}
-            onLoadedMetadata={handleLoadedMetadata}
-            onTimeUpdate={handleTimeUpdate}
-            onError={() => setError('Something went wrong with the video player')}
-          >
-            <source
-              src={videoUrl ? videoUrl : videoOptions[0].url}
-              type='video/mp4' />
-            Your browser does not support the video element.
-          </video>
-
-          <audio
-            ref={audioRef}
-            controls={false}
-            onCanPlay={() => setAudioReady(true)}
-            onError={() => setError('Error occurred during playback of audio')}
-          >
-            <source
-              src={audioUrl ? audioUrl : audioOptions[0].url}
-              type={'audio/mp4'} />
-            Your browser does not support the audio element.
-          </audio>
-
-          {isVideoLoading && (
-            <div className="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center">
-              <div className="w-16 h-16 border-4 border-t-4 border-t-[#FF8A00] border-transparent rounded-full animate-spin "></div>
-              loading..
-            </div>
-          )}
-
-
-          <ShortsController />
-
-          <ShortsDetail shortsId={shortsId} /></section>
-      </section>
-
-
-    </main>
-  );
-};
-
-export default ShortsPage;
+}

@@ -4,40 +4,21 @@ import { Check, ChevronLeft, Fullscreen, FullscreenExit, HighQuality, Language, 
 import { Tooltip } from '@mui/material';
 import '@/app/globals.css';
 import { useShortsPlayer } from '@/context/shorts/ShortsPlayerProvider';
-import { useShortsControls } from '@/context/shorts/ShortsControlsProvider';
+// import { useShortsControls } from '@/context/shorts/ShortsControlsProvider';
 
-export default function ShortsController() {
+export default function ShortsController({ triggerId }) {
 
-    const {
-        fullscreen,
-        setFullscreen,
-        maxTime,
-        currentTime,
-        setCurrentTime,
-        selectedVideoQuality,
-        setSelectedVideoQuality,
-        selectedLanguage,
-        setSelectedLanguage,
-        videoReady,
-        setVideoReady,
-        audioReady,
-        setAudioReady,
-    } = useShortsControls();
 
     const {
-        videoRef,
-        audioRef,
-        setVideoUrl,
-        setAudioUrl,
-        videoOptions,
-        audioOptions,
+        playerState, setPlayerState,
+        controlState, setControlState,
         containerRef,
-        setIsVideoLoading,
-        initialType,
-        firstId
+        getVideoRef, getAudioRef
     } = useShortsPlayer();
 
-    const [playing, setPlaying] = useState(false);
+    const videoElement = getVideoRef(triggerId);
+    const audioElement = getAudioRef(triggerId);
+
     const [volume, setVolume] = useState(1);
     const [previousVolume, setPreviousVolume] = useState();
     const [showvolumeControls, setShowVolumeControls] = useState(false);
@@ -72,46 +53,37 @@ export default function ShortsController() {
         };
 
         const handleVideoClick = () => {
-            if (settingsMenu) {
-                setSettingsMenu((prevSettingsMenu) => ({
-                    ...prevSettingsMenu,
-                [firstId]: false,
-            }));
-                setQualityMenu((prevQualityMenu) => ({
-                    ...prevQualityMenu,
-                    [firstId]: false
-                }));
-                setLanguageMenu((prevLanguageMenu) => ({
-                    ...prevLanguageMenu,
-                    [firstId]: false
-                }));
-                setPlaybackMenu((prevPlaybackMenu) => ({
-                    ...prevPlaybackMenu,
-                    [firstId]: false
-                }));
+            if (settingsMenu || qualityMenu || languageMenu || playbackMenu) {
+                setSettingsMenu(false);
+                setQualityMenu(false);
+                setLanguageMenu(false);
+                setPlaybackMenu(false);
 
             } else {
                 handlePlayPause();
             }
         };
 
-        videoRef?.current?.addEventListener('click', handleVideoClick);
-        videoRef?.current?.addEventListener('dblclick', handleFullscreenToggle);
+        videoElement?.addEventListener('click', handleVideoClick);
+        videoElement?.addEventListener('dblclick', handleFullscreenToggle);
 
         document.addEventListener('keydown', handleKeyDown);
 
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
-            videoRef?.current?.removeEventListener('click', handleVideoClick);
-            videoRef?.current?.removeEventListener('dblclick', handleFullscreenToggle);
+            videoElement?.removeEventListener('click', handleVideoClick);
+            videoElement?.removeEventListener('dblclick', handleFullscreenToggle);
         };
     });
 
     useEffect(() => {
-        if (currentTime === maxTime) {
-            videoRef.current.currentTime = 0;
-            audioRef.current.currentTime = 0;
-            setCurrentTime(0);
+        if (controlState.currentTime[triggerId] === controlState.maxTime[triggerId]) {
+            videoElement.currentTime = 0;
+            audioElement.currentTime = 0;
+            setControlState((prevControlState) => ({
+                ...prevControlState,
+                currentTime: { ...prevControlState.currentTime, [triggerId]: 0 }
+            }))
         }
     })
 
@@ -134,98 +106,149 @@ export default function ShortsController() {
 
     const changeVideoQuality = (itag) => {
 
-        setIsVideoLoading(true);
-        const currentVideoTime = videoRef.current.currentTime;
+        setPlayerState((prevState) => ({
+            ...prevState,
+            isVideoLoading: { ...prevState.isVideoLoading, [triggerId]: true },
+        }))
+        const currentVideoTime = videoElement.currentTime;
 
-        setCurrentTime(currentVideoTime);
-        setSelectedVideoQuality(itag);
+        setControlState((prevControlState) => ({
+            ...prevControlState,
+            currentTime: { ...prevControlState.currentTime, [triggerId]: currentVideoTime },
+            selectedVideoQuality: { ...prevControlState.selectedVideoQuality, [triggerId]: itag },
+        }))
 
-        videoRef.current.pause();
-        audioRef.current.pause();
 
-        let newUrl = videoOptions[firstId].find((format) => format?.itag === itag).url;
+        videoElement.pause();
+        audioElement.pause();
 
-        setVideoUrl(newUrl);
-        videoRef.current.src = newUrl;
-        videoRef.current.load();
+        let newUrl = playerState.videoOptions[triggerId].find((format) => format?.itag === itag).url;
 
-        videoRef.current.currentTime = currentVideoTime;
-        audioRef.current.currentTime = currentVideoTime;
+        setPlayerState((prevState) => ({
+            ...prevState,
+            videoUrl: { ...prevState.videoUrl, [triggerId]: newUrl },
+        }))
+        videoElement.src = newUrl;
+        videoElement.load();
 
-        setVideoReady(false);
-        setAudioReady(false);
+        videoElement.currentTime = currentVideoTime;
+        audioElement.currentTime = currentVideoTime;
+
+        setControlState((prevControlState) => ({
+            ...prevControlState,
+            videoReady: { ...prevControlState.videoReady, [triggerId]: false },
+            audioReady: { ...prevControlState.audioReady, [triggerId]: false },
+        }))
 
         const handleCanPlay = () => {
-            if (videoRef.current.readyState >= 3 && audioRef.current.readyState >= 3) {
-                setIsVideoLoading(false);
-                setVideoReady(true);
-                setAudioReady(true);
+            if (videoElement.readyState >= 3 && audioElement.readyState >= 3) {
 
-                if (playing) {
-                    videoRef.current.play();
-                    audioRef.current.play();
-                    setPlaying(true);
+                setPlayerState((prevState) => ({
+                    ...prevState,
+                    isVideoLoading: { ...prevState.isVideoLoading, [triggerId]: false },
+                }))
+
+                setControlState((prevControlState) => ({
+                    ...prevControlState,
+                    videoReady: { ...prevControlState.videoReady, [triggerId]: true },
+                    audioReady: { ...prevControlState.audioReady, [triggerId]: true },
+                }))
+
+                if (controlState.playing[triggerId]) {
+                    videoElement.play();
+                    audioElement.play();
+                    setControlState((prevControlState) => ({
+                        ...prevControlState,
+                        playing: { ...prevControlState.playing, [triggerId]: true },
+                    }))
                 }
             }
         };
 
-        videoRef.current.oncanplay = handleCanPlay;
-        audioRef.current.oncanplay = handleCanPlay;
+        videoElement.oncanplay = handleCanPlay;
+        audioElement.oncanplay = handleCanPlay;
     };
 
     const changeLanguage = (languageId) => {
-        const currentAudioTime = audioRef.current.currentTime;
+        const currentAudioTime = audioElement.currentTime;
 
-        audioRef.current.pause();
-        videoRef.current.pause();
+        audioElement.pause();
+        videoElement.pause();
 
-        let newLanguage = audioOptions.find((format) => format?.audioTrack?.id === languageId);
+        let newLanguage = playerState.audioOptions[triggerId].find((format) => format?.audioTrack?.id === languageId);
 
-        if (newLanguage && audioRef.current) {
-            audioRef.current.src = newLanguage.url;
-            setAudioUrl(newLanguage.url);
-            setSelectedLanguage(newLanguage?.url ? newLanguage : initialType[0].mimeType);
+        if (newLanguage && audioElement) {
+            audioElement.src = newLanguage.url;
+            setPlayerState((prevState) => ({
+                ...prevState,
+                audioUrl: { ...prevState.audioUrl, [triggerId]: newLanguage.url },
+            }))
+            setControlState((prevControlState) => ({
+                ...prevControlState,
+                selectedLanguage: { ...prevControlState.selectedLanguage, [triggerId]: newLanguage },
+            }))
         }
 
-        setCurrentTime(currentAudioTime);
-        setIsVideoLoading(true);
-        setVideoReady(false);
-        setAudioReady(false);
+        setControlState((prevControlState) => ({
+            ...prevControlState,
+            videoReady: { ...prevControlState.videoReady, [triggerId]: false },
+            audioReady: { ...prevControlState.audioReady, [triggerId]: false },
+            currentTime: { ...prevControlState.currentTime, [triggerId]: currentAudioTime },
+        }))
 
-        audioRef.current.load();
-        videoRef.current.load();
+        setPlayerState((prevState) => ({
+            ...prevState,
+            isVideoLoading: { ...prevState.isVideoLoading, [triggerId]: true },
+        }))
 
-        videoRef.current.currentTime = currentAudioTime;
-        audioRef.current.currentTime = currentAudioTime;
+        audioElement.load();
+        videoElement.load();
+
+        videoElement.currentTime = currentAudioTime;
+        audioElement.currentTime = currentAudioTime;
 
         const handleCanPlay = () => {
-            if (videoRef.current.readyState >= 3 && audioRef.current.readyState >= 3) {
-                setIsVideoLoading(false);
-                setVideoReady(true);
-                setAudioReady(true);
+            if (videoElement.readyState >= 3 && audioElement.readyState >= 3) {
+                setPlayerState((prevState) => ({
+                    ...prevState,
+                    isVideoLoading: { ...prevState.isVideoLoading, [triggerId]: false },
+                }))
 
-                if (playing) {
-                    videoRef.current.play();
-                    audioRef.current.play();
-                    setPlaying(true);
+                setControlState((prevControlState) => ({
+                    ...prevControlState,
+                    videoReady: { ...prevControlState.videoReady, [triggerId]: true },
+                    audioReady: { ...prevControlState.audioReady, [triggerId]: true },
+                }))
+
+
+                if (controlState.playing[triggerId]) {
+                    videoElement.play();
+                    audioElement.play();
+                     setControlState((prevControlState) => ({
+                        ...prevControlState,
+                        playing: { ...prevControlState.playing, [triggerId]: true },
+                    }))
                 }
             }
         };
 
-        videoRef.current.oncanplay = handleCanPlay;
-        audioRef.current.oncanplay = handleCanPlay;
+        videoElement.oncanplay = handleCanPlay;
+        audioElement.oncanplay = handleCanPlay;
     };
 
     const handleSelectPlaybackSpeed = (speed) => {
-        if (videoRef.current && audioRef.current) {
+        if (videoElement && audioElement) {
             setCurrentSpeed(speed);
-            videoRef.current.playbackRate = speed;
-            audioRef.current.playbackRate = speed;
+            videoElement.playbackRate = speed;
+            audioElement.playbackRate = speed;
 
-            if (playing) {
-                videoRef.current.play();
-                audioRef.current.play();
-                setPlaying(true);
+            if (controlState.playing[triggerId]) {
+                videoElement.play();
+                audioElement.play();
+                 setControlState((prevControlState) => ({
+                        ...prevControlState,
+                        playing: { ...prevControlState.playing, [triggerId]: true },
+                    }))
             }
         }
     };
@@ -233,48 +256,68 @@ export default function ShortsController() {
     const handleVolumeToggle = () => {
         setPreviousVolume(volume);
         if (volume !== 0) {
-            if (videoRef.current) videoRef.current.volume = 0;
-            if (audioRef.current) audioRef.current.volume = 0;
+            if (videoElement) videoElement.volume = 0;
+            if (audioElement) audioElement.volume = 0;
             setVolume(0);
         } else {
-            if (videoRef.current) videoRef.current.volume = previousVolume;
-            if (audioRef.current) audioRef.current.volume = previousVolume;
+            if (videoElement) videoElement.volume = previousVolume;
+            if (audioElement) audioElement.volume = previousVolume;
             setVolume(previousVolume);
         }
     }
 
     const handlePlayPause = () => {
-        if (playing) {
-            setPlaying(false);
-            videoRef.current.pause();
-            audioRef.current.pause();
+        if (controlState.playing[triggerId]) {
+              setControlState((prevControlState) => ({
+                        ...prevControlState,
+                        playing: { ...prevControlState.playing, [triggerId]: false },
+                    }))
+            videoElement.pause();
+            audioElement.pause();
         } else {
-            setCurrentTime(videoRef?.current?.currentTime || 0);
+            setControlState((prevControlState) => ({
+                ...prevControlState,
+                currentTime: { ...prevControlState.currentTime, [triggerId]: videoElement?.currentTime || 0 },
+            }))
             handlePlayerReady();
         }
     };
-    const handlePlayerReady = () => {
-        if (videoReady && audioReady) {
-            videoRef.current.currentTime = currentTime;
-            audioRef.current.currentTime = currentTime;
 
-            setPlaying(true);
-            videoRef.current.play();
-            audioRef.current.play();
+    const handlePlayerReady = () => {
+        if (controlState.videoReady[triggerId] && controlState.audioReady[triggerId]) {
+
+            videoElement.currentTime = controlState.currentTime[triggerId] || 0;
+            audioElement.currentTime = controlState.currentTime[triggerId] || 0;
+
+             setControlState((prevControlState) => ({
+                        ...prevControlState,
+                        playing: { ...prevControlState.playing, [triggerId]: true },
+                    }))
+            videoElement.play();
+            audioElement.play();
         } else {
-            setPlaying(false);
-            videoRef.current.pause();
-            audioRef.current.pause();
+              setControlState((prevControlState) => ({
+                        ...prevControlState,
+                        playing: { ...prevControlState.playing, [triggerId]: false },
+                    }))
+            videoElement.pause();
+            audioElement.pause();
         }
     };
 
     const handleFullscreenToggle = () => {
         if (containerRef.current) {
             if (document.fullscreenElement) {
-                setFullscreen(false);
+                setControlState((prevControlState) => ({
+                    ...prevControlState,
+                    fullscreen: false,
+                }))
                 document.exitFullscreen();
             } else {
-                setFullscreen(true);
+                setControlState((prevControlState) => ({
+                    ...prevControlState,
+                    fullscreen: true,
+                }))
                 if (containerRef.current.requestFullscreen) {
                     containerRef.current.requestFullscreen();
                 } else if (containerRef.current.webkitRequestFullscreen) {
@@ -292,29 +335,47 @@ export default function ShortsController() {
         const newVolume = parseFloat(event.target.value);
         setVolume(newVolume);
 
-        if (videoRef.current && audioRef.current) {
-            videoRef.current.volume = newVolume;
-            audioRef.current.volume = newVolume;
+        if (videoElement && audioElement) {
+            videoElement.volume = newVolume;
+            audioElement.volume = newVolume;
         }
     };
 
     const handleTimeChange = (event) => {
-        setIsVideoLoading(true);
 
+        
+        // setPlayerState((prevState) => ({
+        //     ...prevState,
+        //     isVideoLoading: { ...prevState.isVideoLoading, [triggerId]: true },
+        // }))
+        
         const newTime = parseFloat(event.target.value);
-        setCurrentTime(newTime);
-        if (videoRef.current && audioRef.current) {
-            videoRef.current.currentTime = newTime;
-            audioRef.current.currentTime = newTime;
+       
+
+        if (videoElement && audioElement) {
+
+            videoElement.currentTime = newTime;
+            audioElement.currentTime = newTime;
+            setControlState((prevControlState) => ({
+                ...prevControlState,
+                currentTime: { ...prevControlState.currentTime, [triggerId]: newTime },
+            }))
         }
 
-        videoRef.current.oncanplay = () => {
-            setIsVideoLoading(false);
+        videoElement.oncanplay = () => {
+            // setPlayerState((prevState) => ({
+            //     ...prevState,
+            //     isVideoLoading: { ...prevState.isVideoLoading, [triggerId]: false },
+            // }))
 
-            if (playing) {
-                videoRef.current.play();
-                audioRef.current.play();
-                setPlaying(true);
+
+            if (controlState.playing[triggerId]) {
+                videoElement.play();
+                audioElement.play();
+                 setControlState((prevControlState) => ({
+                        ...prevControlState,
+                        playing: { ...prevControlState.playing, [triggerId]: true },
+                    }))
             }
         };
     };
@@ -325,8 +386,8 @@ export default function ShortsController() {
     }
 
     useEffect(() => {
-        updateSliderBackground(currentTime);
-    }, [currentTime]);
+        updateSliderBackground(controlState.currentTime[triggerId]);
+    }, [controlState.currentTime[triggerId]]);
 
     useEffect(() => {
         updateSlider(volume);
@@ -340,7 +401,7 @@ export default function ShortsController() {
 
     const updateSliderBackground = (currentTime) => {
 
-        const percentage = (currentTime / maxTime) * 100;
+        const percentage = (currentTime / controlState.maxTime[triggerId]) * 100;
         const rangeInput = document.querySelector('.prev-css');
 
         rangeInput.style.background = `linear-gradient(to right, #ffb03a ${percentage}%, #333 ${percentage}%)`;
@@ -352,9 +413,9 @@ export default function ShortsController() {
 
             <section className='absolute top-0 left-0 right-0 w-full gap-2 p-4 z-10  flex items-center'>
 
-                <Tooltip title={playing ? 'Pause' : 'Play'} >
+                <Tooltip title={controlState.playing[triggerId] ? 'Pause' : 'Play'} >
                     <button onClick={handlePlayPause} className="text-white flex justify-center items-center p-3 rounded-full bg-[#2a282882]">
-                        {playing ? <Pause className="w-4 h-4 md:w-6 md:h-6" /> : <PlayArrow className="w-4 h-4 md:w-6 md:h-6" />}
+                        {controlState.playing[triggerId] ? <Pause className="w-4 h-4 md:w-6 md:h-6" /> : <PlayArrow className="w-4 h-4 md:w-6 md:h-6" />}
                     </button>
                 </Tooltip>
 
@@ -365,12 +426,12 @@ export default function ShortsController() {
                         onClick={() => {
                             setPreviousVolume(volume);
                             if (volume !== 0) {
-                                if (videoRef.current) videoRef.current.volume = 0;
-                                if (audioRef.current) audioRef.current.volume = 0;
+                                if (videoElement) videoElement.volume = 0;
+                                if (audioElement) audioElement.volume = 0;
                                 setVolume(0);
                             } else {
-                                if (videoRef.current) videoRef.current.volume = previousVolume;
-                                if (audioRef.current) audioRef.current.volume = previousVolume;
+                                if (videoElement) videoElement.volume = previousVolume;
+                                if (audioElement) audioElement.volume = previousVolume;
                                 setVolume(previousVolume);
                             }
                         }}
@@ -404,7 +465,7 @@ export default function ShortsController() {
 
                 <Tooltip title={'Fullscreen'}>
                     <button onClick={handleFullscreenToggle} className="ml-auto p-3 flex justify-center items-center rounded-full bg-[#2a282882]">
-                        {fullscreen ? <FullscreenExit className="w-4 h-4 md:w-6 md:h-6" /> : <Fullscreen className="w-4 h-4 md:w-6 md:h-6" />}
+                        {controlState.fullscreen ? <FullscreenExit className="w-4 h-4 md:w-6 md:h-6" /> : <Fullscreen className="w-4 h-4 md:w-6 md:h-6" />}
                     </button>
                 </Tooltip>
 
@@ -419,13 +480,13 @@ export default function ShortsController() {
             </button>
 
 
-            <span className={`${fullscreen ? 'w-[100%]' : ''} shorts-control px-2  z-10 flex items-center gap-2 w-full absolute left-0 bottom-0 right-0 `}>
+            <span className={`${controlState.fullscreen ? 'w-[100%]' : ''} shorts-control px-2  z-10 flex items-center gap-2 w-full absolute left-0 bottom-0 right-0 `}>
 
                 <input
                     type="range"
                     min="0"
-                    max={maxTime}
-                    value={currentTime}
+                    max={controlState.maxTime[triggerId]}
+                    value={controlState.currentTime[triggerId]}
                     onChange={handleTimeChange}
                     className="prev-css w-full"
                 />
@@ -434,7 +495,7 @@ export default function ShortsController() {
 
             {settingsMenu &&
                 <ul className={`absolute  z-10 border-[1px] border-gray-500 rounded-xl bottom-[45px] md:bottom-[65px] backdrop-brightness-50 backdrop-blur right-2 overflow-y-scroll scrollbar-hidden p-2`}
-                    style={{ maxHeight: `${videoRef?.current?.clientHeight * 0.7}px` }}>
+                    style={{ maxHeight: `${videoElement.clientHeight * 0.7}px` }}>
 
                     <button
                         onClick={() => {
@@ -447,7 +508,7 @@ export default function ShortsController() {
                         <HighQuality className="w-4 h-4 md:w-6 md:h-6" /> Quality
                     </button>
 
-                    {audioOptions && audioOptions[0]?.audioTrack?.id &&
+                    {playerState.audioOptions[triggerId] && playerState.audioOptions[triggerId][0]?.audioTrack?.id &&
                         <button
                             onClick={() => {
                                 setSettingsMenu(false);
@@ -484,44 +545,44 @@ export default function ShortsController() {
 
             {qualityMenu &&
                 <ul className={`absolute  z-10 border-[1px] border-gray-500 rounded-xl bottom-[45px] md:bottom-[65px] backdrop-brightness-50 backdrop-blur right-2 overflow-y-scroll scrollbar-hidden  p-2`}
-                    style={{ maxHeight: `${videoRef?.current?.clientHeight * 0.7}px` }}>
+                    style={{ maxHeight: `${videoElement?.clientHeight * 0.7}px` }}>
                     <button
                         onClick={() => { handleSubMenuToggle("quality"); }}
                         className='px-2 py-1 rounded-full flex items-center justify-start'>
                         <ChevronLeft className="w-4 h-4 md:w-6 md:h-6" />
                     </button>
-                    {videoOptions?.map((option, index) => (
+                    {playerState.videoOptions[triggerId]?.map((option, index) => (
                         <li
                             key={index}
                             className="flex cursor-pointer w-full mt-1 md:mt-2 px-2 md:px-8  items-center juctify-center gap-2 text-white text-xs md:text-lg  rounded-md md:rounded-xl  hover:backdrop-blur-xl p-2 "
                             onClick={() => { changeVideoQuality(option?.itag), setQualityMenu(false); }}>
                             {option?.qualityLabel}
-                            {option?.itag === selectedVideoQuality ? <Check className="w-4 h-4 md:w-6 md:h-6" /> : ""}
+                            {option?.itag === controlState.selectedVideoQuality[triggerId] ? <Check className="w-4 h-4 md:w-6 md:h-6" /> : ""}
                         </li>
                     ))}
                 </ul>}
 
             {languageMenu &&
                 <ul className={`absolute  z-10 border-[1px] border-gray-500 rounded-xl bottom-[45px] md:bottom-[65px] backdrop-brightness-50 backdrop-blur right-2 overflow-y-scroll scrollbar-hidden p-2`}
-                    style={{ maxHeight: `${videoRef?.current?.clientHeight * 0.7}px` }}>
+                    style={{ maxHeight: `${videoElement?.clientHeight * 0.7}px` }}>
                     <button
                         onClick={() => { handleSubMenuToggle("language"); }}
                         className='px-2 py-1 rounded-full flex items-center justify-start'>
                         <ChevronLeft className="w-4 h-4 md:w-6 md:h-6" />
                     </button>
-                    {audioOptions?.map((option, index) => (
+                    {playerState.audioOptions[triggerId]?.map((option, index) => (
                         <li className="flex cursor-pointer w-full mt-1 md:mt-2 px-2 py-2 md:px-8  items-center gap-2 text-white p-2 text-xs md:text-lg  rounded-md md:rounded-xl  hover:backdrop-blur-xl "
                             key={index}
                             onClick={() => { changeLanguage(option?.audioTrack?.id), setLanguageMenu(false); }}>
                             {option?.audioTrack?.displayName}
-                            {option?.audioTrack?.id === selectedLanguage?.audioTrack?.id ? <Check className="w-4 h-4 md:w-6 md:h-6" /> : ""}
+                            {option?.audioTrack?.id === controlState.selectedLanguage[triggerId]?.audioTrack?.id ? <Check className="w-4 h-4 md:w-6 md:h-6" /> : ""}
                         </li>
                     ))}
                 </ul>}
 
             {playbackMenu &&
                 <ul className={`absolute  z-10 w-[100px] md:w-[200px] border-[1px] border-gray-500 rounded-xl bottom-[45px] md:bottom-[65px] backdrop-brightness-50 backdrop-blur right-2 overflow-y-scroll scrollbar-hidden p-2`}
-                    style={{ maxHeight: `${videoRef?.current?.clientHeight * 0.7}px` }}>
+                    style={{ maxHeight: `${videoElement?.clientHeight * 0.7}px` }}>
                     <button
                         onClick={() => { handleSubMenuToggle("playback") }}
                         className='px-2 py-1 rounded-full flex items-center justify-start'>

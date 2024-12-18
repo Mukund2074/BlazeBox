@@ -7,7 +7,7 @@ import Link from 'next/link';
 import React, { useEffect, useRef, useState } from 'react'
 
 export default function ShortsComments({
-    shortsId,
+    triggerId,
     setError
 }) {
 
@@ -25,10 +25,10 @@ export default function ShortsComments({
     useEffect(() => {
         const fetchComments = async () => {
             try {
-                if (shortsId !== undefined && shortsId !== null && !hasFetched.current) {
+                if (triggerId !== undefined && triggerId !== null && !hasFetched.current) {
                     hasFetched.current = true;
                     await commentFetcher({
-                        videoId: shortsId,
+                        videoId: triggerId,
                         setComments,
                         setContinuationComments,
                         setLoadingMore,
@@ -42,15 +42,15 @@ export default function ShortsComments({
             }
         }
         fetchComments();
-    }, [shortsId])
+    }, [triggerId])
 
     const fetchMoreComments = async () => {
         try {
-            if (shortsId === undefined || shortsId === null) {
+            if (triggerId === undefined || triggerId === null) {
                 return;
             } else if (isEnd && moreRequest) {
                 commentContinuationFetcher({
-                    videoId: shortsId,
+                    videoId: triggerId,
                     setComments,
                     continuationComments,
                     setContinuationComments,
