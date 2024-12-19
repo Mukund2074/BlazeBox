@@ -6,17 +6,12 @@ import DataProvider from '@/context/DataProvider';
 import ChannelProvider from '@/context/ChannelProvider';
 import ShortsPlayerProvider from '@/context/shorts/ShortsPlayerProvider';
 import ShortsControlProvider from '@/context/shorts/ShortsControlsProvider';
-import { redirect } from 'next/navigation';
 import Footer from '@/components/footer/Footer';
 import Header from '@/components/header/Header';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
 
 export default function RootLayout({ children }) {
-
-  const handleClick = () => {
-    redirect('/home');
-  };
 
   return (
     <html lang="en">
