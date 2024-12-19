@@ -23,13 +23,13 @@ export const mainFetcher = async ({
 
 
   try {
-    const position = await getLocationOfUser();
-    const { latitude, longitude } = position.coords;
+    // const position = await getLocationOfUser();
+    // const { latitude, longitude } = position.coords;
 
-    const address = await fetchAddress(latitude, longitude);
-    const countryCode = address.features[0].properties.country_code.toUpperCase();
-    // let countryCode = ''
-    setCountryCode(countryCode || '');
+    // const address = await fetchAddress(latitude, longitude);
+    // const countryCode = address.features[0].properties.country_code.toUpperCase();
+    let countryCode = ''
+    setCountryCode(countryCode || 'IN');
 
     let url = '';
     if (noGeo) {
