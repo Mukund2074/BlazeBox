@@ -6,7 +6,7 @@ import { Home, TrendingUp } from '@mui/icons-material';
 export default function PageManager({ children }) {
 
   const [showChildern, setShowChildern] = useState(false);
-  const pathname = window.location.pathname;
+  const pathname = window === undefined ? '/' : window.location.pathname;
   useEffect(() => {
     if (pathname === '/') {
       setShowChildern(false);
