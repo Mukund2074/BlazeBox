@@ -1,22 +1,17 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Home, TrendingUp } from '@mui/icons-material';
 
 export default function PageManager({ children }) {
 
-  const [initialRoute, setInitialRoute] = useState(true);
   const [showChildern, setShowChildern] = useState(false);
-
-  const pathname = usePathname();
+  const pathname = window.location.pathname;
   useEffect(() => {
     if (pathname === '/') {
-      setInitialRoute(true);
       setShowChildern(false);
     }
     else {
-      setInitialRoute(false);
       setShowChildern(true);
     }
   }, [pathname])
@@ -85,7 +80,7 @@ export default function PageManager({ children }) {
         </main>
       </React.Fragment>
     );
-  } else if (initialRoute) {
+  } else if (!showChildern) {
     return (
       <InfoCard />
     );
