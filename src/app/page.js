@@ -11,7 +11,7 @@ export default function PageManager({ children }) {
   
   const router = useRouter();
   useEffect(() => {
-    if (router.pathname === '/') {
+    if (router.pathname === '/' || router.pathname === undefined || router.pathname === null) {
       setShowChildern(false);
     }
     else {
