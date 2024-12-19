@@ -1,20 +1,23 @@
 'use client';
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Home, TrendingUp } from '@mui/icons-material';
 
 export default function PageManager({ children }) {
 
   const [showChildern, setShowChildern] = useState(false);
-  const pathname = window === undefined ? '/' : window.location.pathname;
+  
+  
+  const router = useRouter();
   useEffect(() => {
-    if (pathname === '/') {
+    if (router.pathname === '/') {
       setShowChildern(false);
     }
     else {
       setShowChildern(true);
     }
-  }, [pathname])
+  }, [router.pathname]);
 
 
   const InfoCard = () => {
