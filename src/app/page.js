@@ -6,6 +6,8 @@ import { Home, TrendingUp } from '@mui/icons-material';
 
 export default function PageManager({ children }) {
 
+  const pathname = usePathname();
+
 
 
   const InfoCard = () => {
@@ -67,6 +69,7 @@ export default function PageManager({ children }) {
   return (
     <React.Fragment>
       <main className={`pt-20`}>
+        {pathname === '/' && <InfoCard />}
         {children}
       </main>
     </React.Fragment>
