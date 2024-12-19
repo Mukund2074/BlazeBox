@@ -1,4 +1,6 @@
 'use client';
+import '@/app/globals.css'
+import { ChevronRightTwoTone, Close, Home, Menu, TrendingUpOutlined, VideoCameraBack, VideoLibrarySharp } from '@mui/icons-material'
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import SearchIcon from '@mui/icons-material/Search';
@@ -6,20 +8,21 @@ import '@/app/globals.css';
 import api from '@/context/Api';
 import { HttpStatusCode } from 'axios';
 import { useRouter } from 'next/navigation';
-import {  CloseRounded, WidgetsRounded } from '@mui/icons-material';
-import { useDataContext } from '@/context/DataProvider';
+import { CloseRounded, WidgetsRounded } from '@mui/icons-material';
 
-export default function Header({ toggleCategories }) {
+export default function Header({ }) {
 
   const [searchModelOpen, setSearchModelOpen] = useState(false);
 
   const [inputQuery, setInputQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
 
+  const [showCats, setShowCats] = useState(false);
   const router = useRouter();
 
-  const { selected, setSelected, setQueryParams } = useDataContext();
-
+  const toggleCats = () => {
+    setShowCats(!showCats);
+  }
 
   useEffect(() => {
     const fetchSearchResults = async () => {
@@ -27,7 +30,7 @@ export default function Header({ toggleCategories }) {
 
         if (inputQuery.length > 2) {
 
-          const formattedQuery = inputQuery.replace(/%20/g, ' ').replace(/#/g, '%23'); 
+          const formattedQuery = inputQuery.replace(/%20/g, ' ').replace(/#/g, '%23');
 
           const response = await api.get(`search?query=${encodeURIComponent(formattedQuery)}`);
 
@@ -75,6 +78,10 @@ export default function Header({ toggleCategories }) {
     toggleSearchModel();
   }
 
+  const Catagories = [
+    { id: 1, name: 'Home', to: '/home', icon: <Home /> },
+    { id: 2, name: 'Trending', to: '/trending', icon: <TrendingUpOutlined /> },
+  ]
 
   return (
     <header className="w-full fixed z-30 top-0 left-0 right-0 text-[#d8c9b8]">
@@ -98,8 +105,8 @@ export default function Header({ toggleCategories }) {
           </button>
 
 
-          <button className={`backdrop-blur-[2px] backdrop-brightness-50 hover:transform hover:translate-y-[-5px] px-6 py-2 rounded-lg hover:transition hover:ease-in-out hover:duration-300 shadow-custom-dark border-[1px] border-[#ff8a00]`} onClick={toggleCategories}>
-            <WidgetsRounded />
+          <button className={`backdrop-blur-[2px] backdrop-brightness-50 hover:transform hover:translate-y-[-5px] px-6 py-2 rounded-lg hover:transition hover:ease-in-out hover:duration-300 shadow-custom-dark border-[1px] border-[#ff8a00]`} onClick={toggleCats} >
+            <Menu />
           </button>
         </span>
 
@@ -150,6 +157,23 @@ export default function Header({ toggleCategories }) {
 
 
       </div>
+
+      {showCats &&
+        <span className='w-full items-start bg-gradient-to-b border-b-[3px] border-[#ffb03a] shadow-custom-dark  from-[#1b1a1a]  via-[#1c0c12] to-[#130619]  gap-8 flex flex-row  py-4 px-4 overflow-x-scroll scrollbar-hidden '>
+          <button className='hover:transform hover:translate-y-[-5px] px-4 py-1  rounded-lg hover:transition hover:ease-in-out hover:duration-300 shadow-custom-dark border-t-[1px] responsive-paragraph border-b-[1px] border-[#ff8a00] '
+            onClick={toggleCats}
+          >
+            <Close />
+          </button>
+
+          {Catagories.map((catagory) => (
+            <Link key={catagory.id} href={catagory.to} onClick={toggleCats} className='flex items-center flex-row gap-2 hover:transform hover:translate-y-[-5px] px-4 py-1 min-w-max text-center rounded-lg hover:transition hover:ease-in-out hover:duration-300 shadow-custom-dark border-t-[1px]  border-b-[1px] border-[#ff8a00] responsive-paragraph'>
+              {catagory.icon}  {catagory.name}
+            </Link>
+          ))}
+        </span>
+      }
     </header>
   );
 }
+

@@ -1,60 +1,30 @@
 'use client';
-import Footer from '@/components/footer/Footer';
-import Catagories from '@/components/header/Catagories';
-import Header from '@/components/header/Header';
-import { SentimentSatisfiedAlt } from '@mui/icons-material';
-import WidgetsIcon from '@mui/icons-material/Widgets';
 import React, { useEffect, useState } from 'react';
-import HomeIcon from '@mui/icons-material/Home';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import SearchIcon from '@mui/icons-material/Search';
-import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
-import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { Home, TrendingUp } from '@mui/icons-material';
 
 export default function PageManager({ children }) {
 
-  const [catsOpen, setCatsOpen] = useState(false);
-  const [isTop, setIsTop] = useState(true);
-  const [uri, setUri] = useState('');
+  const [initialRoute, setInitialRoute] = useState(true);
+  const [showChildern, setShowChildern] = useState(false);
 
-
+  const pathname = usePathname();
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.pageYOffset;
-      setIsTop(scrollPosition >= 0);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
+    if (pathname === '/') {
+      setInitialRoute(true);
+      setShowChildern(false);
+    }
+    else {
+      setInitialRoute(false);
+      setShowChildern(true);
+    }
+  }, [pathname])
 
 
-
-  const toggleCategories = (e) => {
-    setCatsOpen((prevMenu) => prevMenu ? null : e.currentTarget);
-  }
-
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [children]);
-
-  useEffect(() => {
-    const url = window.location.pathname;
-
-    setUri(url === '/' ? true : false);
-  }, []);
-
-
-  
   const InfoCard = () => {
     return (
-      <div className="flex justify-center py-4 bg-gradient-to-r from-gray-900 via-gray-700 to-black">
+      <div className="flex justify-center items-center h-screen  py-4 bg-gradient-to-r from-gray-900 via-gray-700 to-black">
         <div className="max-w-lg w-full backdrop-blur-xl bg-[#00000080] rounded-2xl shadow-2xl p-8 space-y-6 border border-gray-600">
           <div className="text-center text-white">
             <h2 className="text-4xl font-semibold mb-4">Welcome to BlazeBox</h2>
@@ -81,23 +51,22 @@ export default function PageManager({ children }) {
               Please allow location access for personalized suggestions based on your country!
             </p>
           </div>
-  
-          {/* Card Footer with Navigation Buttons */}
-          <div className="text-center text-white opacity-80 space-y-4">
-          <div className="flex justify-center gap-6">
-            <Link href={'/home'} className="flex text-sm items-center gap-3 2text-white py-1 px-2 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 hover:scale-105 transform rounded-md border-[1px] shadow-custom-dark transition-all duration-300">
-              <HomeIcon fontSize="medium" /> Home
-            </Link>
-            <Link href={'/trending'} className="flex text-sm items-center gap-3 2text-white py-1 px-2 bg-gradient-to-r from-teal-500 via-green-500 to-blue-500 hover:scale-105 transform rounded-md border-[1px] shadow-custom-dark transition-all duration-300">
-              <TrendingUpIcon fontSize="medium" /> Trending
-            </Link>
-          </div>
-  
+
+          <div className="text-center text-white opacity-80 space-y-4 border-t-[1px] pt-4">
+            <div className="flex justify-center gap-6">
+            <h1 className='responsive-text font-semibold text-center' > Quick Links : </h1>
+              <Link href={'/home'} className="flex text-sm items-center gap-3 2text-white py-1 px-2 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 hover:scale-105 transform rounded-md border-[1px] shadow-custom-dark transition-all duration-300">
+                <Home fontSize="medium" /> Home
+              </Link>
+              <Link href={'/trending'} className="flex text-sm items-center gap-3 2text-white py-1 px-2 bg-gradient-to-r from-teal-500 via-green-500 to-blue-500 hover:scale-105 transform rounded-md border-[1px] shadow-custom-dark transition-all duration-300">
+                <TrendingUp fontSize="medium" /> Trending
+              </Link>
+            </div>
             <div className="text-sm mt-4">
-              <p>For more inquiries, contact us at: 
+              <p>For more inquiries, contact us at:
                 <a href="mailto:hadiyamukund16@gmail.com" className="text-blue-400 hover:text-blue-600">hadiyamukund16@gmail.com</a>
               </p>
-              <p>Visit our portfolio: 
+              <p>Visit our portfolio:
                 <a href="https://portfolio-mukund-hadiya.netlify.app/" className="text-blue-400 hover:text-blue-600">https://portfolio-mukund-hadiya.netlify.app/</a>
               </p>
             </div>
@@ -106,26 +75,19 @@ export default function PageManager({ children }) {
       </div>
     );
   };
-  
-
-  return (
-    <React.Fragment>
-
-      <Header toggleCategories={toggleCategories} />
-      {catsOpen &&
-        <section className='w-full fixed top-16 max-h-32 z-20 gap-8 flex overflow-x-scroll scrollbar-hidden '>
-          <Catagories toggleCategories={toggleCategories} />
-        </section>
-      }
-      <main className={`pt-20`}>
-        {uri ?
-          <InfoCard />
-          :
-          children}
-      </main>
 
 
-      <Footer />
-    </React.Fragment>
-  );
+  if (showChildern) {
+    return (
+      <React.Fragment>
+        <main className={`pt-20`}>
+          {children}
+        </main>
+      </React.Fragment>
+    );
+  } else if (initialRoute) {
+    return (
+      <InfoCard />
+    );
+  }
 }
