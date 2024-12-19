@@ -167,11 +167,11 @@ const VideoPage = () => {
         <div ref={containerRef} className='w-full relative rounded-xl overflow-hidden'>
           <video
             ref={videoRef}
-            className={` ${fullscreen ? 'fullscreen' : ''}
+            className={` ${fullscreen ? 'fullscreen min-h-screen' : ''}
              z-[1] w-[640px] sm:w-[720px] md:w-[1080px] lg:w-[1280px] xl:w-[1440px] 2xl:w-[1920px] rounded-xl`}
             poster={bestMatchLocator(videoData?.thumbnail, 'url')}
             controls={false}
-            height='auto'
+            height={`${fullscreen ? '100vh' : 'auto'} `}
             muted={initialType ? true : false}
             onTimeUpdate={handleTimeUpdate}
             onLoadedMetadata={handleLoadedMetadata}
