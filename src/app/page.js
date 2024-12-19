@@ -1,23 +1,22 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Home, TrendingUp } from '@mui/icons-material';
 
 export default function PageManager({ children }) {
 
-  const [showChildern, setShowChildern] = useState(false);
-  
-  
-  const router = useRouter();
+  const [showChildern, setShowChildern] = useState(true);
+
+  const pathname = usePathname();
   useEffect(() => {
-    if (router.pathname === '/' || router.pathname === undefined || router.pathname === null) {
+    if (pathname === '/') {
       setShowChildern(false);
     }
     else {
       setShowChildern(true);
     }
-  }, [router.pathname]);
+  }, [pathname]);
 
 
   const InfoCard = () => {
@@ -52,7 +51,7 @@ export default function PageManager({ children }) {
 
           <div className="text-center text-white opacity-80 space-y-4 border-t-[1px] pt-4">
             <div className="flex justify-center gap-6">
-            <h1 className='responsive-text font-semibold text-center' > Quick Links : </h1>
+              <h1 className='responsive-text font-semibold text-center' > Quick Links : </h1>
               <Link href={'/home'} className="flex text-sm items-center gap-3 2text-white py-1 px-2 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 hover:scale-105 transform rounded-md border-[1px] shadow-custom-dark transition-all duration-300">
                 <Home fontSize="medium" /> Home
               </Link>
