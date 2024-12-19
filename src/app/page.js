@@ -6,17 +6,6 @@ import { Home, TrendingUp } from '@mui/icons-material';
 
 export default function PageManager({ children }) {
 
-  const [showChildern, setShowChildern] = useState(true);
-
-  const pathname = usePathname();
-  useEffect(() => {
-    if (pathname === '/') {
-      setShowChildern(false);
-    }
-    else {
-      setShowChildern(true);
-    }
-  }, [pathname]);
 
 
   const InfoCard = () => {
@@ -74,17 +63,13 @@ export default function PageManager({ children }) {
   };
 
 
-  if (showChildern) {
-    return (
-      <React.Fragment>
-        <main className={`pt-20`}>
-          {children}
-        </main>
-      </React.Fragment>
-    );
-  } else if (!showChildern) {
-    return (
-      <InfoCard />
-    );
-  }
+
+  return (
+    <React.Fragment>
+      <main className={`pt-20`}>
+        {children}
+      </main>
+    </React.Fragment>
+  );
+
 }
