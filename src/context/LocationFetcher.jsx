@@ -1,8 +1,6 @@
 'use client';
 import axios from 'axios';
 
-
-
 export const getLocationOfUser = async () => {
   return new Promise((resolve, reject) => {
     if (navigator.geolocation) {

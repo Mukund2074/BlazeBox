@@ -15,7 +15,7 @@ export default function ChannelHome({ channel }) {
 
 
   return (
-    <span className="mt-8 shadow-custom-dark border-[1px] rounded-xl border-[#ff8a00]">
+    <span className=" mt-8 shadow-custom-dark border-[1px] rounded-xl border-[#ff8a00]">
 
       {playerListings && playerListings.map((playerListings, index) => {
         let videoId = playerListings.videoId;

@@ -3,11 +3,18 @@ import React, { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Home, TrendingUp } from '@mui/icons-material';
+import { getLocationOfUser } from '@/context/LocationFetcher';
 
 export default function PageManager({ children }) {
 
-  const pathname = usePathname();
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [children]);
 
+  const pathname = usePathname();
+  useEffect(() => {
+    getLocationOfUser()
+  }, [])
 
 
   const InfoCard = () => {

@@ -7,6 +7,7 @@ const ChannelContext = createContext();
 export default function ChannelProvider({ children }) {
 
     const [channel, setChannel] = useState([]);
+    const [about, setAbout] = useState([]);
     const [loading, setLoading] = useState(true);
     const [channelId, setChannelId] = useState('');
 
@@ -20,13 +21,14 @@ export default function ChannelProvider({ children }) {
         const fetchChannel = async () => {
             if (!channelId) return;
             ChannelFetcher({ channelId, setChannel, setLoading });
+            ChannelFetcher({ channelId, changeOfPath: 'about', setChannel: setAbout, setLoading });
         }
         fetchChannel();
     }, [channelId]);
 
 
     return (
-        <ChannelContext.Provider value={{ channel, loading, setChannelId , activeTab, setActiveTab , channelTabs }}>
+        <ChannelContext.Provider value={{ channel,about, loading, setChannelId , activeTab, setActiveTab , channelTabs }}>
             {children}
         </ChannelContext.Provider>
     );

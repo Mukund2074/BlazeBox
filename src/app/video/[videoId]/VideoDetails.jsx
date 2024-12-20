@@ -1,15 +1,24 @@
 'use client'
+import React, { useRef, useState } from 'react'
+import { bestMatchLocator } from '@/context/MultiContentRender';
 import { DangerousRounded, Download, Share, ThumbDownOutlined, ThumbUpOutlined, Verified } from '@mui/icons-material';
 import { Avatar, Tooltip } from '@mui/material';
 import Link from 'next/link';
-import React, { useRef, useState } from 'react'
 
-export default function VideoDetails({ videoData, channel, bestMatchLocator }) {
+
+export default function VideoDetails({ videoData, channel, toggleShare , initialType  }) {
 
   const [collapsed, setIsCollapsed] = useState(true);
   const topRef = useRef(null);
 
-  let formattedSubscriberCount = channel?.meta?.subscriberCountText.toString() + ' Subscribers';
+  const toggleDownload = () => {
+    // start download from initialType[0].url
+    
+    
+
+  }
+
+
 
   return (
     <section id='details' className='w-full p-4 mt-2'>
@@ -34,7 +43,7 @@ export default function VideoDetails({ videoData, channel, bestMatchLocator }) {
 
 
 
-        <Link href={`/channel/${videoData?.channelId}`} passHref
+        <Link href={`/channel/${channel?.meta?.channelHandle}`}
           className='flex w-auto items-center mr-auto'>
           <span className='flex items-center'>
             <Avatar
@@ -68,21 +77,18 @@ export default function VideoDetails({ videoData, channel, bestMatchLocator }) {
         </Tooltip>
 
 
-        <Tooltip
-          title={
-            <span className='flex flex-col w-full bg-[#1b1b1a] p-2 border-[1px] border-[#ff8a00] rounded-lg'>
-              <font className='text-red-500 text-sm justify-center flex-1 items-center'>
-                <DangerousRounded className='w-6 h-6' />
-                <br /> Like ,Dislike , Share , Download will not work  Officially .. <br /> This is demo version </font>
-            </span>
-          }
-          className='p-2 rounded-lg w-full flex items-center justify-between mt-4 md:mt-0 gap-4' >
-          <ThumbUpOutlined className='w-6  h-6 md:ml-auto cursor-pointer ' />
-          <ThumbDownOutlined className='w-6  h-6 cursor-pointer' />
-          <Share className='w-6  h-6 cursor-pointer' />
-          <Download className='w-6  h-6 cursor-pointer' />
 
-        </Tooltip>
+        <span className='p-2 rounded-lg w-full flex items-center justify-between mt-4 md:mt-0 gap-4' >
+
+          <Tooltip title="Like" > <ThumbUpOutlined className='w-6  h-6 md:ml-auto cursor-pointer ' /> </Tooltip>
+
+          <Tooltip title="Dislike"><ThumbDownOutlined className='w-6  h-6 cursor-pointer' /></Tooltip>
+
+          <Tooltip title="Share"> <Share onClick={() => { toggleShare() }} className='w-6  h-6 cursor-pointer' /> </Tooltip>
+
+          <a href={initialType[0].url} download={initialType[0].url} > <Tooltip title="Download"> <Download  className='w-6 h-6 cursor-pointer' /> </Tooltip></a>
+
+        </span>
 
       </section>
 
@@ -94,12 +100,12 @@ export default function VideoDetails({ videoData, channel, bestMatchLocator }) {
             {videoData?.publishDate
               ? new Date(videoData.publishDate).toLocaleString('en-US', {
                 year: 'numeric',
-                month: 'short', 
-                day: 'numeric', 
+                month: 'short',
+                day: 'numeric',
                 hour: 'numeric',
                 minute: 'numeric',
                 second: 'numeric',
-                hour12: true 
+                hour12: true
               })
               : ""}
           </font>

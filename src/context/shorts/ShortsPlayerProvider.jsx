@@ -27,7 +27,10 @@ export default function ShortsPlayerProvider({ children }) {
         sequenceContinuation: {},
         isEnd: {},
         playerRefresher: false,
-        allSet: false
+        allSet: false,
+        fetchMore: false,
+        currentCount: 3
+
     });
 
     const [controlState, setControlState] = useState({
@@ -49,30 +52,28 @@ export default function ShortsPlayerProvider({ children }) {
     const containerRef = useRef({});
     const IndexRef = useRef({});
 
-    // useEffect(() => {
-    //     if (playerState.playerRefresher) {
-    //         // Reset all playerState properties
-    //         setPlayerState((prevState) => ({
-    //             ...prevState,
-    //             poster: {},
-    //             shortsData: {},
-    //             videoUrl: {},
-    //             audioUrl: {},
-    //             videoOptions: {},
-    //             audioOptions: {},
-    //             loading: {},
-    //             error: {},
-    //             isVideoLoading: {},
-    //             initialType: {},
-    //             sequence: {},
-    //             sequenceContinuation: {},
-    //             isEnd: {},
-    //             playerRefresher: false,
-    //         }));
-    //     }
-    // }, [playerState.playerRefresher]);
-
-    // Fetch shorts data for a given ID
+    useEffect(() => {
+        if (playerState.playerRefresher) {
+            // Reset all playerState properties
+            setPlayerState((prevState) => ({
+                ...prevState,
+                poster: {},
+                shortsData: {},
+                videoUrl: {},
+                audioUrl: {},
+                videoOptions: {},
+                audioOptions: {},
+                loading: {},
+                error: {},
+                isVideoLoading: {},
+                initialType: {},
+                sequence: {},
+                sequenceContinuation: {},
+                isEnd: {},
+                playerRefresher: false,
+            }));
+        }
+    }, [playerState.playerRefresher]);
 
 
     const fetchSequence = async (id) => {
@@ -143,7 +144,7 @@ export default function ShortsPlayerProvider({ children }) {
                     ...prevState,
                     videoOptions: { ...prevState.videoOptions, [id]: videoOptions },
                     audioOptions: { ...prevState.audioOptions, [id]: audioOptions },
-                    videoUrl: { ...prevState.videoUrl, [id]: videoOptions[3]?.url },
+                    videoUrl: { ...prevState.videoUrl, [id]: videoOptions[0]?.url },
                     audioUrl: { ...prevState.audioUrl, [id]: audioOptions[0]?.url },
                 }));
 
@@ -179,6 +180,28 @@ export default function ShortsPlayerProvider({ children }) {
         }
     };
 
+    const fetchMoreData = async () => {
+        if (playerState.fetchMore) {
+            const startIndex = playerState.currentCount;
+            const endIndex = startIndex + 2;
+
+            const twoMore = playerState.listOfIds.slice(startIndex, endIndex);
+
+            const idsToFetch = twoMore.filter((id) => !playerState.shortsData[id]);
+
+            idsToFetch.forEach((id) => {
+                fetchShortsData(id);
+            });
+
+            // Update state to reflect the current count incremented by 2
+            setPlayerState((prevState) => ({
+                ...prevState,
+                currentCount: prevState.currentCount + 2,
+                fetchMore: false
+            }));
+        }
+    };
+
 
 
     useEffect(() => {
@@ -186,9 +209,10 @@ export default function ShortsPlayerProvider({ children }) {
         if (!playerState.listOfIds) {
             return;
         }
-        playerState.listOfIds.slice(0, 5).forEach((id) => {
+        playerState.listOfIds.slice(0, 2).forEach((id) => {
             fetchShortsData(id);
         });
+
     }, [playerState.listOfIds, shortsIdForNav]);
 
     useEffect(() => {
@@ -202,48 +226,57 @@ export default function ShortsPlayerProvider({ children }) {
     const getAudioRef = (id) => audioRef.current[id];
     const getContainerRef = (id) => containerRef.current[id];
 
-    //create observer that checks if the indexref.current[annyId] element is in the viewport then it log that which video id is in the viewport and log the current id of the video that is in the viewport
     const [visibleCards, setVisibleCards] = useState([]);
 
     const handleIntersection = (entries) => {
-    
+
         entries.forEach((entry) => {
-            const ID = entry.target.id; // ID of the element currently intersecting
+            const ID = entry.target.id;
             const isInView = entry.isIntersecting;
-    
+
             if (isInView) {
-    
-                // Check if the ID in the viewport matches the ID in IndexRef.current
+
                 if (IndexRef.current[ID] && IndexRef.current[ID].id === ID) {
-    
-                    // Pause all videos
+
                     Object.keys(videoRef.current).forEach((videoId) => {
                         videoRef.current[videoId].pause();
                         audioRef.current[videoId].pause();
                     });
-    
-                    // Play the current video
-                    videoRef.current[ID].play();
-                    audioRef.current[ID].play();
-    
-                    // Optionally update the state to reflect that this video is playing
-                    setControlState((prevControlState) => ({
-                        ...prevControlState,
-                        playing: { ...prevControlState.playing, [ID]: true },
-                    }));
+
+                    if (videoRef.current[ID] && audioRef.current[ID]) {
+
+
+                        videoRef.current[ID].play();
+                        audioRef.current[ID].play();
+
+                        setControlState((prevControlState) => ({
+                            ...prevControlState,
+                            playing: { ...prevControlState.playing, [ID]: true },
+                        }));
+                    }
                 }
-    
-                // Add the ID to the visibleCards list if it's not already present
+                // current id is 3rd id of list
+                playerState.listOfIds.forEach((id, index) => {
+                    if (index % 2 !== 0) {
+                        if (IndexRef.current[id] && IndexRef.current[id].id === id) {
+                            setPlayerState((prevState) => ({
+                                ...prevState,
+                                fetchMore: true
+                            }));
+                            fetchMoreData();
+                        }
+                    }
+                });
+
+
                 if (!visibleCards.includes(ID)) {
                     setVisibleCards((prev) => [...prev, ID]);
                 }
             } else {
-                // Optionally, you can pause the video when it's not in view (if required)
                 if (IndexRef.current[ID] && IndexRef.current[ID].id === ID) {
                     videoRef.current[ID].pause();
                     audioRef.current[ID].pause();
-    
-                    // Optionally update the state to reflect that the video is not playing
+
                     setControlState((prevControlState) => ({
                         ...prevControlState,
                         playing: { ...prevControlState.playing, [ID]: false },
@@ -252,7 +285,7 @@ export default function ShortsPlayerProvider({ children }) {
             }
         });
     };
-    
+
 
 
     useEffect(() => {
@@ -265,7 +298,7 @@ export default function ShortsPlayerProvider({ children }) {
         setTimeout(() => {
 
 
-            playerState.listOfIds.slice(0, 5).forEach(id => {
+            playerState.listOfIds.slice(0, 2).forEach(id => {
                 const element = IndexRef.current[id];
                 if (element) {
                     observer.observe(element);
@@ -274,11 +307,11 @@ export default function ShortsPlayerProvider({ children }) {
         }, 7000);
 
         return () => observer.disconnect();
-    }, [visibleCards , playerState.listOfIds]);
+    }, [visibleCards, playerState.listOfIds , videoRef, audioRef]);
 
     useEffect(() => {
-        
-    }, [IndexRef , playerState.listOfIds]);
+
+    }, [IndexRef, playerState.listOfIds]);
 
     return (
         <ShortsPlayerContext.Provider value={{

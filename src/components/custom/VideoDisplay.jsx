@@ -82,7 +82,7 @@ export default function VideoDisplay({
         <section className={`w-full grid ${cols ? 'grid-cols-1 ' : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 '} gap-4`}>
           {
             channel.map((item, index) => (
-              <Link ref={channel.length - 1 === index ? endRef : null} href={`/channel/${item?.channelId}`} key={index}>
+              <Link ref={channel.length - 1 === index ? endRef : null} href={`/channel/${item.channelTitle ? `@${item.channelTitle.replace(/ /g, '')}` : `${item.channelId}`}`} key={index}>
                 <section className='flex items-center justify-center w-full border-[1px] border-[#ff8a00] overflow-hidden rounded-xl gap-4 px-4 py-2 h-[300px]' >
                   <section key={index} className=" py-8 flex flex-col items-center rounded-xl gap-4 md:gap-4 ">
                     <Avatar

@@ -11,15 +11,12 @@ export default function Shorts() {
     const { shortsId } = useParams();
     const {
         setShortsIdForNav,
-        playerState,
+        playerState,setPlayerState,
         controlState, setControlState,
         videoRef,
         audioRef,
         containerRef,
         IndexRef,
-        getVideoRef,
-        getAudioRef,
-        getContainerRef,
     } = useShortsPlayer();
 
     useEffect(() => {
@@ -28,15 +25,21 @@ export default function Shorts() {
         }
     }, [shortsId, setShortsIdForNav]);
 
+    useEffect(() => {
+        setPlayerState((prevState) => ({
+            ...prevState,
+            playerRefresher : true
+        }))
+    },[])
+
     if (!playerState.allSet) {
         return (
             <ShortsLoader count={1} singleMain={true} />
         )
     }
 
+
     if (playerState.allSet) {
-
-
         const handleTimeUpdate = (id) => {
             setControlState((prevControlState) => ({
                 ...prevControlState,
@@ -48,19 +51,19 @@ export default function Shorts() {
             <main id='main-section' ref={containerRef} className={` ${controlState.fullscreen ? 'py-0' : 'py-4'} w-full flex flex-col items-center justify-center gap-2`}>
                 <section className={`flex flex-col items-center max-h-[100dvh] snap-y snap-mandatory overflow-y-scroll gap-10 pb-28 scrollbar-hidden ${controlState.fullscreen ? 'min-h-[100dvh]' : 'min-h-[90dvh] py-4'}`}>
                     {
-                        playerState && playerState.listOfIds.slice(0, 5).map((item, index) => {
+                        playerState && playerState.listOfIds.slice(0, playerState.currentCount).map((item, index) => {
 
                             return (
                                 <section
                                     key={index}
                                     id={item}
                                     ref={(el) => IndexRef.current[item] = el}
-                                    className={`relative mx-auto max-w-[500px] w-full snap-start snap-always overflow-hidden rounded-xl ${controlState.fullscreen ? 'min-h-[99dvh] max-h-[99dvh]' : 'min-h-[85dvh] max-h-[85dvh]'} `}
+                                    className={`relative mx-auto max-w-[400px] w-full snap-start snap-always overflow-hidden rounded-xl ${controlState.fullscreen ? 'min-h-[99dvh] max-h-[99dvh]' : 'min-h-[85dvh] max-h-[85dvh]'} `}
                                 >
 
                                     <video
                                         ref={(el) => videoRef.current[item] = el}
-                                        className={`w-[100%]  ${controlState.fullscreen ? 'h-full' : 'h-[90dvh]'}  rounded-xl`}
+                                        className={`w-full  ${controlState.fullscreen ? 'h-[100dvh]' : 'h-[90dvh]'}  rounded-xl`}
                                         id={`${item}`}
                                         onCanPlay={() => {
                                             setControlState((prevControlState) => ({
@@ -113,7 +116,7 @@ export default function Shorts() {
                             );
                         })}
 
-                        <p className='text-gray-400 responsive-text'> Only 5 Continue Shorts are available in this version </p>
+                        <p className='text-gray-400 responsive-text'> Only {playerState.currentCount} Continue Shorts are available in this version </p>
                 </section>
             </main>
         )

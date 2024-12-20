@@ -18,17 +18,20 @@ export default function ShortsController({ triggerId }) {
 
     const videoElement = getVideoRef(triggerId);
     const audioElement = getAudioRef(triggerId);
+    
 
+    
     const [volume, setVolume] = useState(1);
     const [previousVolume, setPreviousVolume] = useState();
     const [showvolumeControls, setShowVolumeControls] = useState(false);
-
+    
     const [settingsMenu, setSettingsMenu] = useState(false);
     const [currentSpeed, setCurrentSpeed] = useState(1);
-
+    
     const [qualityMenu, setQualityMenu] = useState(false);
     const [languageMenu, setLanguageMenu] = useState(false);
     const [playbackMenu, setPlaybackMenu] = useState(false);
+    
 
     useEffect(() => {
         const handleKeyDown = (event) => {
@@ -77,7 +80,7 @@ export default function ShortsController({ triggerId }) {
     });
 
     useEffect(() => {
-        if (controlState.currentTime[triggerId] === controlState.maxTime[triggerId]) {
+        if (controlState.currentTime[triggerId] === controlState.maxTime[triggerId] && videoElement && audioElement) {
             videoElement.currentTime = 0;
             audioElement.currentTime = 0;
             setControlState((prevControlState) => ({
@@ -85,7 +88,7 @@ export default function ShortsController({ triggerId }) {
                 currentTime: { ...prevControlState.currentTime, [triggerId]: 0 }
             }))
         }
-    })
+    },[videoElement, audioElement, controlState.currentTime[triggerId], controlState.maxTime[triggerId]])
 
     function handleSubMenuToggle(menuName) {
         switch (menuName) {
@@ -474,6 +477,9 @@ export default function ShortsController({ triggerId }) {
             <button
                 className='absolute bottom-4  z-10 right-2 text-white flex justify-center items-center p-3 rounded-full bg-[#2a282882]'
                 onClick={() => {
+                    setQualityMenu(false);
+                    setPlaybackMenu(false);
+                    setLanguageMenu(false);
                     setSettingsMenu(!settingsMenu);
                 }}>
                 <Settings className='w-4 h-4 md:w-6 md:h-6' />
@@ -485,8 +491,8 @@ export default function ShortsController({ triggerId }) {
                 <input
                     type="range"
                     min="0"
-                    max={controlState.maxTime[triggerId]}
-                    value={controlState.currentTime[triggerId]}
+                    max={controlState.maxTime[triggerId] ? controlState.maxTime[triggerId] : 0}
+                    value={controlState.currentTime[triggerId] ? controlState.currentTime[triggerId] : 0}
                     onChange={handleTimeChange}
                     className="prev-css w-full"
                 />
@@ -500,6 +506,7 @@ export default function ShortsController({ triggerId }) {
                     <button
                         onClick={() => {
                             setSettingsMenu(false);
+                          
                             setTimeout(() => {
                                 setQualityMenu(true);
                             }, 100);

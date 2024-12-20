@@ -28,7 +28,7 @@ export const mainFetcher = async ({
 
     // const address = await fetchAddress(latitude, longitude);
     // const countryCode = address.features[0].properties.country_code.toUpperCase();
-    let countryCode = ''
+    let countryCode = 'IN'
     setCountryCode(countryCode || 'IN');
 
     let url = '';
@@ -228,12 +228,34 @@ export const commentContinuationFetcher = async ({
 
 export const ChannelFetcher = async ({
   channelId,
+  changeOfPath,
   setChannel = () => { },
   setError = () => { },
   setLoading = () => { },
 }) => {
   try {
-    const channel = await api.get(`channel/home?id=${channelId}`);
+
+    let url;
+    let newid = decodeURIComponent(channelId);
+
+    if (changeOfPath) {
+      if (newid.startsWith('@')) {
+        url = `channel/${changeOfPath}?forUsername=${decodeURIComponent(newid)}`;
+      } else {
+        url = `channel/${changeOfPath}?id=${decodeURIComponent(newid)}`;
+      }
+    } else {
+      if (newid.startsWith('@')) {
+        url = `channel/home?forUsername=${decodeURIComponent(newid)}`;
+      } else {
+        url = `channel/home?id=${decodeURIComponent(newid)}`;
+      }
+    }
+    
+    
+
+
+    const channel = await api.get(`${url}`);
     if (channel.status === HttpStatusCode.Ok && channel.data) {
       setChannel(channel.data);
     }
