@@ -111,8 +111,6 @@ export const VideoCard = ({
     currentIndex = 0
 }) => {
 
-    // console.log(`currentIndex: ${currentIndex}, last8thVideo: ${last8thVideo}, lastvideo: ${lastvideo}`);
-
     let Videoref = currentIndex.toString() === last8thVideo.toString() || currentIndex.toString() === lastvideo.toString() ? endRef : null
 
 

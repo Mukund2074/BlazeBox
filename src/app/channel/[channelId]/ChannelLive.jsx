@@ -13,10 +13,17 @@ export default function ChannelLive({ channelId }) {
         setEndRef(endRef);
     } , [setEndRef]);
 
-    useEffect(() => { 
-        setPath(`/channel/liveStreams?id=${channelId}`)
-        setContinuationPath(`/channel/liveStreams?id=${channelId}&token=${continuation}`)
-    } , [continuation , channelId , setPath , setContinuationPath ]);
+    useEffect(() => {
+        let decodeID = decodeURIComponent(channelId);
+
+        if(decodeID.startsWith('@')){
+            setPath(`channel/liveStreams?forUsername=${decodeID}`);
+            setContinuationPath(`channel/liveStreams?forUsername=${decodeID}&token=${continuation}`);
+        } else {
+            setPath(`channel/liveStreams?id=${decodeID}`);
+            setContinuationPath(`channel/liveStreams?id=${decodeID}&token=${continuation}`);
+        }
+    }, [continuation , channelId , setPath , setContinuationPath ]);
 
     if (error) console.log(error)
 

@@ -17,13 +17,13 @@ export default function ChannelHome({ channel }) {
   return (
     <span className=" mt-8 shadow-custom-dark border-[1px] rounded-xl border-[#ff8a00]">
 
-      {playerListings && playerListings.map((playerListings, index) => {
+      {/* {playerListings && playerListings.map((playerListings, index) => {
         let videoId = playerListings.videoId;
 
         return (
           <section key={index}></section>
         )
-      })}
+      })} */}
 
       {videoListings && videoListings.map((videoListings, index) => (
 

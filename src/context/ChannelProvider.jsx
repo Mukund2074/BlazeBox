@@ -19,7 +19,7 @@ export default function ChannelProvider({ children }) {
 
     useEffect(() => {
         const fetchChannel = async () => {
-            if (!channelId) return;
+            if (!channelId || channelId === '' || channelId === undefined || channelId === null) return;
             ChannelFetcher({ channelId, setChannel, setLoading });
             ChannelFetcher({ channelId, changeOfPath: 'about', setChannel: setAbout, setLoading });
         }

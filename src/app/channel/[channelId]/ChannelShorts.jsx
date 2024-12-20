@@ -11,9 +11,18 @@ export default function ChannelShorts({ channelId }) {
     const endRef = useRef(null);
 
     useEffect(() => {
-        setPath(`/channel/shorts?id=${channelId}`);
-        setContinuationPath(`/channel/shorts?id=${channelId}&token=${continuation}`);
+        let decodeID = decodeURIComponent(channelId);
+
+        if(decodeID.startsWith('@')){
+            setPath(`channel/shorts?forUsername=${decodeID}`);
+            setContinuationPath(`channel/shorts?forUsername=${decodeID}&token=${continuation}`);
+        } else {
+            setPath(`channel/shorts?id=${decodeID}`);
+            setContinuationPath(`channel/shorts?id=${decodeID}&token=${continuation}`);
+        }
     }, [continuation , channelId , setPath , setContinuationPath ]);
+
+    
 
     useEffect(() => {
         setEndRef(endRef);

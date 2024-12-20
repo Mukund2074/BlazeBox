@@ -30,9 +30,7 @@ export default function Header({ }) {
 
         if (inputQuery.length > 2) {
 
-          const formattedQuery = inputQuery.replace(/%20/g, ' ').replace(/#/g, '%23');
-
-          const response = await api.get(`search?query=${encodeURIComponent(formattedQuery)}`);
+          const response = await api.get(`search?query=${decodeURIComponent(inputQuery)}`);
 
           if (response.status === HttpStatusCode.Ok) {
             let combine = [];

@@ -10,9 +10,16 @@ export default function ChannelCommunity({ channelId }) {
     const { post, setPath, setContinuationPath, continuation, setEndRef, loadingInitial, loadingMore, error } = useDataContext();
 
     useEffect(() => {
-        setPath(`/channel/community?id=${channelId}`);
-        setContinuationPath(`/channel/community?id=${channelId}&token=${continuation}`);
-    }, [continuation, channelId, setPath, setContinuationPath]);
+        let decodeID = decodeURIComponent(channelId);
+
+        if(decodeID.startsWith('@')){
+            setPath(`channel/community?forUsername=${decodeID}`);
+            setContinuationPath(`channel/community?forUsername=${decodeID}&token=${continuation}`);
+        } else {
+            setPath(`channel/community?id=${decodeID}`);
+            setContinuationPath(`channel/community?id=${decodeID}&token=${continuation}`);
+        }
+    }, [continuation , channelId , setPath , setContinuationPath ]);
 
     useEffect(() => {
         setEndRef(endRef);
@@ -21,8 +28,6 @@ export default function ChannelCommunity({ channelId }) {
     const endRef = useRef(null);
 
     const [selectedOptions, setSelectedOptions] = useState({});
-    const [isScrolledLeft, setIsScrolledLeft] = useState(false);
-    const [isScrolledRight, setIsScrolledRight] = useState(false);
 
 
 
@@ -32,32 +37,6 @@ export default function ChannelCommunity({ channelId }) {
             [postId]: id,
         }));
     };
-
-
-
-
-    useEffect(() => {
-        const container = document.querySelector('.overflow-x-auto');
-        if (container) {
-            const handleScrollPosition = () => {
-                const scrollLeft = container.scrollLeft;
-                const scrollWidth = container.scrollWidth;
-                const clientWidth = container.clientWidth;
-
-
-                setIsScrolledLeft(scrollLeft > 0);
-                setIsScrolledRight(scrollLeft < scrollWidth - clientWidth);
-            };
-
-            container.addEventListener('scroll', handleScrollPosition);
-
-            handleScrollPosition();
-
-            return () => {
-                container.removeEventListener('scroll', handleScrollPosition);
-            };
-        }
-    }, []);
 
 
 
@@ -74,8 +53,6 @@ export default function ChannelCommunity({ channelId }) {
                     endRef={endRef}
                     selectedOptions={selectedOptions}
                     handleSelection={handleSelection}
-                    isScrolledLeft={isScrolledLeft}
-                    isScrolledRight={isScrolledRight}
                 />
             ))}
             <span ref={endRef} />

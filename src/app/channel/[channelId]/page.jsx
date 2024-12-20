@@ -31,7 +31,7 @@ export default function Channel() {
   const { channel, about, loading, setChannelId, activeTab, setActiveTab, channelTabs } = useChannel();
 
   useEffect(() => {
-    setChannelId(channelId);
+    setChannelId(decodeURIComponent(channelId));
   }, [channelId]);
 
   const [subscribed, setSubscribed] = useState(false);

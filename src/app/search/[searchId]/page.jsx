@@ -30,7 +30,7 @@ export default function Search() {
 
   useEffect(() => {
     const buildPath = () => {
-      let path = `/search?query=${searchId}`;
+      let path = `/search?query=${decodeURIComponent(searchId)}`;
 
       if (selectedConfirm.types) path += `&type=${selectedConfirm.types}` ;
       if (selectedConfirm.sorts) path += `&sort=${selectedConfirm.sorts}`;
@@ -42,7 +42,7 @@ export default function Search() {
     };
 
     const buildContinuationPath = () => {
-      let continuationPath = `/search?query=${searchId}&token=${continuation}`;
+      let continuationPath = `/search?query=${decodeURIComponent(searchId)}&token=${continuation}`;
 
       if (selectedConfirm.types) continuationPath += `&type=${selectedConfirm.types}`;
       if (selectedConfirm.sorts) continuationPath += `&sort=${selectedConfirm.sorts}`;
@@ -138,7 +138,7 @@ export default function Search() {
     <main className={`relative p-4`}>
 
       <section className="flex items-center gap-2 mb-2">
-        <font className=" font-semibold text-gray-400 responsive-text flex items-center gap-2 ">Search Results for   <span className="text-blue-500 underline"> {searchId.replace(/%20/g, ' ')}     {queryParams?.length}</span></font>
+        <font className=" font-semibold text-gray-400 responsive-text flex items-center gap-2 ">Search Results for   <span className="text-blue-500 underline"> {decodeURIComponent(searchId)}     {queryParams?.length}</span></font>
 
         <button onClick={() => setShowFilterModel(!showFilterModel)} className="border-[1px] flex items-center gap-2 border-[#ff8a00] text-gray-400 text-sm ml-auto rounded-lg px-2 py-1" >
           <Sort className="w-4 h-4 md:w-6 md:h-6 lg:w-8 lg:h-8" /> Filter

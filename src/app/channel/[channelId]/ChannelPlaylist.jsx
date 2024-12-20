@@ -7,14 +7,20 @@ import React, { useEffect, useRef } from 'react'
 
 export default function ChannelPlaylist({ channelId }) {
 
-    const { playlists , loadingInitial , loadingMore , continuation , error , setPath , setContinuationPath , setEndRef } = useDataContext();
+    const { playlists, loadingInitial, loadingMore, continuation, error, setPath, setContinuationPath, setEndRef } = useDataContext();
 
     const endRef = useRef(null);
-
     useEffect(() => {
-        setPath(`/channel/playlists?id=${channelId}`)
-        setContinuationPath(`/channel/playlists?id=${channelId}&token=${continuation}`);
-    }, [continuation , channelId , setPath , setContinuationPath ]);
+        let decodeID = decodeURIComponent(channelId);
+
+        if (decodeID.startsWith('@')) {
+            setPath(`channel/playlists?forUsername=${decodeID}`);
+            setContinuationPath(`channel/playlists?forUsername=${decodeID}&token=${continuation}`);
+        } else {
+            setPath(`channel/playlists?id=${decodeID}`);
+            setContinuationPath(`channel/playlists?id=${decodeID}&token=${continuation}`);
+        }
+    }, [continuation, channelId, setPath, setContinuationPath]);
 
     useEffect(() => {
         setEndRef(endRef);

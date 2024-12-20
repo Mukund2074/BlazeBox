@@ -6,13 +6,22 @@ import React, { useEffect, useRef } from 'react'
 
 export default function ChannelVideos({ channelId }) {
 
-  const { mainVideos , shorts , extraVideos , loadingInitial ,continuation , loadingMore , error  , setPath , setContinuationPath , setEndRef } = useDataContext();
+  const { mainVideos, shorts, extraVideos, loadingInitial, continuation, loadingMore, error, setPath, setContinuationPath, setEndRef } = useDataContext();
   const endRef = useRef(null);
 
+
   useEffect(() => {
-    setPath(`/channel/videos?id=${channelId}`)
-    setContinuationPath(`/channel/videos?id=${channelId}&token=${continuation}`)
-  }, [continuation , channelId , setPath , setContinuationPath ]);
+    let decodeID = decodeURIComponent(channelId);
+
+    if (decodeID.startsWith('@')) {
+      setPath(`channel/videos?forUsername=${decodeID}`);
+      setContinuationPath(`channel/videos?forUsername=${decodeID}&token=${continuation}`);
+    } else {
+      setPath(`channel/videos?id=${decodeID}`);
+      setContinuationPath(`channel/videos?id=${decodeID}&token=${continuation}`);
+    }
+  }, [continuation, channelId, setPath, setContinuationPath]);
+
 
   useEffect(() => {
     setEndRef(endRef);

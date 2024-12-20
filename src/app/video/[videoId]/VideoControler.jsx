@@ -114,8 +114,6 @@ export default function VideoControler({
         const currentVideoTime = videoRef.current.currentTime;
 
         setCurrentTime(currentVideoTime);
-        console.log("itag", itag);
-        
         setSelectedVideoQuality(itag);
 
         videoRef.current.pause();

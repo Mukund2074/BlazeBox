@@ -28,6 +28,16 @@ export default function ChannelSearch({
     const [showFilters, setShowFilters] = useState(false);
     const [activeFilter, setActiveFilter] = useState('newest');
 
+    let decodedId = decodeURIComponent(channelId);
+    let url;
+
+    if (decodedId.startsWith('@')) {
+        url = `channel/search?forUsername=${decodedId}`;
+    } else {
+        url = `channel/search?id=${decodedId}`;
+    }
+
+
     useEffect(() => {
         const fetchData = async () => {
             if (searchedText.length >= 2) {
@@ -36,7 +46,7 @@ export default function ChannelSearch({
                     setContinuation,
                     setError,
                     setCountryCode,
-                    path: `/channel/search?id=${channelId}&query=${searchedText}`,
+                    path: `${url}/&query=${searchedText}`,
                     setLoadingInitial,
                     noGeo: true
                 })
@@ -55,7 +65,7 @@ export default function ChannelSearch({
             setLoadingMore,
             countryCode,
             continuation,
-            path: `/channel/search?id=${channelId}&query=${searchedText}&token=${continuation}`,
+            path: `${url}/&query=${searchedText}&token=${continuation}`,
             isEnd,
             loadingMore
         })
@@ -70,7 +80,6 @@ export default function ChannelSearch({
     ]
 
 
-    if (error) console.log(error);
     if (loadingInitial) return <SkeletonLoader count={10} noGrid={true} />
 
     return (
@@ -95,7 +104,7 @@ export default function ChannelSearch({
                                 setContinuation,
                                 setError,
                                 setCountryCode,
-                                path: `/channel/search?id=${channelId}&query=${searchedText}&sort_by=${item.path}`,
+                                path: `${url}/&query=${searchedText}&sort_by=${item.path}`,
                                 setLoadingInitial,
                                 noGeo: true
                             })
