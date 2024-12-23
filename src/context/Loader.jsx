@@ -45,16 +45,8 @@ export const ShortsLoader = ({ count = 10, singleMain = false }) => {
     } else {
         return (
             <main className='flex flex-col gap-4 items-center justify-center w-full'>
-                <span className="hover:shadow-md flex flex-col w-[400px] h-[600px] border-gray-800 rounded-tl-3xl rounded-br-3xl">
-                    <Skeleton variant="rect" width="100%" height={600} className="rounded-tl-3xl  bg-gray-800" />
-                    <span className="p-2 flex gap-2 mt-2 bg-transparent rounded-b-xl">
-                        <span className="flex flex-col w-full">
-                            <Skeleton width="80%" height={20} className='bg-gray-800' />
-                            <Skeleton width="60%" height={15} className='bg-gray-800' />
-                            <Skeleton width="40%" height={15} className='bg-gray-800' />
-                        </span>
-                    </span>
-
+                <span className="hover:shadow-md flex p-4 flex-col w-full h-[600px] items-center justify-center rounded-3xl ">
+                    <Skeleton variant="rect" width="300px" height={600} className="rounded-3xl bg-gray-800" />
                 </span>
             </main>
         )

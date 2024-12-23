@@ -11,7 +11,7 @@ export default function Shorts() {
     const { shortsId } = useParams();
     const {
         setShortsIdForNav,
-        playerState,setPlayerState,
+        playerState, setPlayerState,
         controlState, setControlState,
         videoRef,
         audioRef,
@@ -28,9 +28,9 @@ export default function Shorts() {
     useEffect(() => {
         setPlayerState((prevState) => ({
             ...prevState,
-            playerRefresher : true
+            playerRefresher: true
         }))
-    },[])
+    }, [])
 
     if (!playerState.allSet) {
         return (
@@ -53,70 +53,72 @@ export default function Shorts() {
                     {
                         playerState && playerState.listOfIds.slice(0, playerState.currentCount).map((item, index) => {
 
-                            return (
-                                <section
-                                    key={index}
-                                    id={item}
-                                    ref={(el) => IndexRef.current[item] = el}
-                                    className={`relative mx-auto max-w-[400px] w-full snap-start snap-always overflow-hidden rounded-xl ${controlState.fullscreen ? 'min-h-[99dvh] max-h-[99dvh]' : 'min-h-[85dvh] max-h-[85dvh]'} `}
-                                >
-
-                                    <video
-                                        ref={(el) => videoRef.current[item] = el}
-                                        className={`w-full  ${controlState.fullscreen ? 'h-[100dvh]' : 'h-[90dvh]'}  rounded-xl`}
-                                        id={`${item}`}
-                                        onCanPlay={() => {
-                                            setControlState((prevControlState) => ({
-                                                ...prevControlState,
-                                                videoReady: { ...prevControlState.videoReady, [item]: true },
-                                            }))
-                                        }}
-                                        onLoadedMetadata={() => {
-                                            setControlState((prevControlState) => ({
-                                                ...prevControlState,
-                                                maxTime: { ...prevControlState.maxTime, [item]: videoRef.current[item].duration },
-                                                setup : true
-                                            }))
-                                        }}
-                                        onTimeUpdate={() => handleTimeUpdate(item)}
+                            if (playerState.videoOptions[item] && playerState.videoOptions[item].length > 0) {
+                                return (
+                                    <section
+                                        key={index}
+                                        id={item}
+                                        ref={(el) => IndexRef.current[item] = el}
+                                        className={`relative mx-auto max-w-[400px] w-full snap-start snap-always overflow-hidden rounded-xl ${controlState.fullscreen ? 'min-h-[99dvh] max-h-[99dvh]' : 'min-h-[85dvh] max-h-[85dvh]'} `}
                                     >
-                                        <source src={`${playerState.videoUrl[item]}`} type="video/mp4" />
-                                        Your browser does not support the video tag.
 
-                                    </video>
+                                        <video
+                                            ref={(el) => videoRef.current[item] = el}
+                                            className={`w-full  ${controlState.fullscreen ? 'h-[100dvh]' : 'h-[90dvh]'}  rounded-xl`}
+                                            id={`${item}`}
+                                            onCanPlay={() => {
+                                                setControlState((prevControlState) => ({
+                                                    ...prevControlState,
+                                                    videoReady: { ...prevControlState.videoReady, [item]: true },
+                                                }))
+                                            }}
+                                            onLoadedMetadata={() => {
+                                                setControlState((prevControlState) => ({
+                                                    ...prevControlState,
+                                                    maxTime: { ...prevControlState.maxTime, [item]: videoRef.current[item].duration },
+                                                    setup: true
+                                                }))
+                                            }}
+                                            onTimeUpdate={() => handleTimeUpdate(item)}
+                                        >
+                                            <source src={`${playerState.videoUrl[item]}`} type="video/mp4" />
+                                            Your browser does not support the video tag.
 
-                                    <audio
-                                        ref={(el) => audioRef.current[item] = el}
-                                        id={`${item}`}
-                                        className={`w-full h-full  rounded-xl`}
-                                        onCanPlay={() => {
-                                            setControlState((prevControlState) => ({
-                                                ...prevControlState,
-                                                audioReady: { ...prevControlState.audioReady, [item]: true },
-                                            }))
-                                        }}
-                                    >
-                                        <source src={playerState.audioUrl[item]} type="audio/mpeg" />
-                                        Your browser does not support the audio tag.
-                                    </audio>
+                                        </video>
 
-                                    {playerState.isVideoLoading[item] && (
-                                        <div className="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center">
-                                            <div className="w-16 h-16 border-4 border-t-4 border-t-[#FF8A00] border-transparent rounded-full animate-spin "></div>
-                                            loading..
-                                        </div>
-                                    )}
+                                        <audio
+                                            ref={(el) => audioRef.current[item] = el}
+                                            id={`${item}`}
+                                            className={`w-full h-full  rounded-xl`}
+                                            onCanPlay={() => {
+                                                setControlState((prevControlState) => ({
+                                                    ...prevControlState,
+                                                    audioReady: { ...prevControlState.audioReady, [item]: true },
+                                                }))
+                                            }}
+                                        >
+                                            <source src={playerState.audioUrl[item]} type="audio/mpeg" />
+                                            Your browser does not support the audio tag.
+                                        </audio>
 
-                                    <ShortsController triggerId={item} />
+                                        {playerState.isVideoLoading[item] && (
+                                            <div className="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center">
+                                                <div className="w-16 h-16 border-4 border-t-4 border-t-[#FF8A00] border-transparent rounded-full animate-spin "></div>
+                                            </div>
+                                        )}
 
-                                    <ShortsDetail triggerId={item} />
+                                        <ShortsController triggerId={item} />
+
+                                        <ShortsDetail triggerId={item} />
 
 
-                                </section>
-                            );
+                                    </section>
+                                );
+
+                            }
                         })}
 
-                        <p className='text-gray-400 responsive-text'> Only {playerState.currentCount} Continue Shorts are available in this version </p>
+                    <p className='text-gray-400 responsive-text'> Only limited Shorts are available in this version </p>
                 </section>
             </main>
         )
